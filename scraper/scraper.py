@@ -4,104 +4,157 @@ from http.cookies import SimpleCookie
 import re
 import bibtexparser
 import ast
+from typing import Callable
+from pathlib import Path
 
-BASE_HEADERS = ({'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36'})
-BASE_URL = 'https://www-jstor-org.ezproxy.uct.ac.za/'
+class JstorArticle:
+    """This class encapsulates the metadata and actual article downloaded from JSTOR
 
-VIEW_ONLINE_PATH = 'https://www-jstor-org.ezproxy.uct.ac.za/stable/'
-PDF_PATH = 'https://www-jstor-org.ezproxy.uct.ac.za/stable/pdf/'
+    Args:
+        * meta_dict (dict) : Dictionary of arbitrary metadata key-value pairs
+        * pdf (bytes) : Raw bytes of downloaded pdf
 
-PAPER_ID = '2629139'
+    Attributes: 
+        metadata_dict (dict) : Direct access to metadata dictionary
+    """
+    _pdf_blob = None
 
-AUTH_COOKIE = ''
+    metadata_dict = None
 
-OUT_FILE = r'F:\woo.pdf'
+    def __init__(self, meta_dict: dict, pdf: bytes) -> None:
+        self._pdf_blob = pdf
+        self.metadata_dict = meta_dict
+
+    def save_pdf(self, path: Path) -> None:
+        """Saves the JstorArticle's pdf data to the given Path
+
+        Args:
+            * path (Path): Path object providing location for data to be saved to
+        """
+
+        with path.open(OUT_FILE, 'xb') as p:
+            p.write(self._pdf_blob)
 
 
+class JstorScraper:
+    """Provides an interface to download an article and its metadata from JSTOR given a valid session
 
-# Converts a request's cookie string into a dictionary that we can use with requests.
-def parse_cookies(cookiestring: str) -> dict:
+    Args:
+        * web_session (requests.Session) : Existing authenticated session (through proxy if needed) to use for scraping JSTOR.
+        * rewrite_rule: (Callable[[str], str]) : Optional callable providing a way to rewrite URIs if necessary for proxy etc.
+        * base_url (str, optional) : Base URL which requests will be made relative to. Defaults to `https://www.jstor.org`.
+        * preview_path (str, optional) : URL relative to base_url for article description/preview. Defaults to `/stable/`.
+        * pdf_path (str, optional) : URL relative to base_url for pdf download. Defaults to `/stable/pdf/`.
+        * metadata_path (str, optional) : URL relative to base_url for JSON metadata API. Defaults to `/stable/content-metadata/`.
+    """
 
-    # The UCT session cookies have messy formats that http.cookies doesn't like
-    # We have to manually parse - this may be fragile!
+    _session : requests.Session = None
 
-    cookies = {}
-    kv_regex = re.compile(r'(?P<key>[^;=]+)=(?P<val>[^;]*);')
-    
-    for c in kv_regex.finditer(cookiestring):
-        cookies[c.group('key')] = c.group('val')
+    _rewrite_rule : Callable[[str], str] = None
 
-    return cookies
+    _base_url : str = None
 
-# Loads JSTOR page and finds link to download PDF
-def get_payload_data(document_id: int, session: requests.Session) -> dict:
+    _prev_path : str = None
 
-    view_uri = VIEW_ONLINE_PATH + str(document_id)
+    _pdf_path : str = None 
 
-    # Send the request
-    page_request = session.get(view_uri, headers = BASE_HEADERS)
+    _meta_path : str = None
 
-    # View response
-    if page_request.status_code != 200:
-        raise ValueError('Received response code ' + page_request.response_code)
+    def __init__(self, 
+                 web_session: requests.Session, 
+                 rewrite_rule: Callable[[str], str] = None, 
+                 base_url: str = 'https://www.jstor.org',
+                 preview_path: str = '/stable/',
+                 pdf_path: str = '/stable/pdf/',
+                 metadata_path: str = '/stable/content-metadata/') -> None:
 
-    # Build DOM model
-    view_page_soup = BeautifulSoup(page_request.content, 'html.parser')
+        # Populate private attributes:                 
 
-    # Most of the JSTOR page is built dynamically, so there's nothing to scrape directly :'(
-    # Try to get document metadata from Google Analytics script block. 
-    # TODO: consider adding any missing fields from elsewhere?
-    try:
-        jstor_metadata_script = view_page_soup.head.find('script', attrs={'data-analytics-provider':'ga'}).string
+        self._session = web_session
 
-        jstor_metadata_match = re.search(r'gaData.content = (?P<dict>{[^}]+});', jstor_metadata_script)
+        self._base_url = base_url 
 
-        jstor_data_dict = ast.literal_eval(jstor_metadata_match.group('dict'))
-    except TypeError as exc:
-        raise ValueError('Unable to get document metadata from JSTOR response') from exc
+        self._prev_path = preview_path
 
-    # Now try download the pdf
-    pdf_uri = PDF_PATH + str(document_id) + '.pdf'
+        self._pdf_path = pdf_path 
 
-    pdf_request = session.get(pdf_uri, headers = BASE_HEADERS)
+        self._meta_path = metadata_path
 
-    # JSTOR may ask us to request terms and conditions - have to send a new request accepting them
-    if pdf_request.headers['content-type'] == 'text/html':
-        pdf_page_soup = BeautifulSoup(pdf_request.content, 'html.parser')
+        # If there is no rewrite rule just use identity function:
+        if rewrite_rule == None:
+            self._rewrite_rule = lambda m : m
+        else:
+            self._rewrite_rule = rewrite_rule
 
-        accept_form = pdf_page_soup.find('form', attrs = {'method': 'POST', 'action': re.compile(r'/tc/verify')})
+    # Loads JSTOR page and finds link to download PDF
+    def get_payload_data(self, document_id: int) -> JstorArticle:
+        """Obtain download link and metadata for a given article on JSTOR
 
-        csrf_token = accept_form.find('input', attrs = {'name': 'csrfmiddlewaretoken'})['value']
+        Args:
+            * document_id (int): The JSTOR document ID to process
 
-        pdf_request_payload = {'csrfmiddlewaretoken' : csrf_token}
+        Raises:
+            ValueError: If JSTOR returns an unexpected response to requests
 
-        pdf_request = session.post(BASE_URL + accept_form['action'], data = pdf_request_payload)
+        Returns:
+            dict: Article metadata and the binary article blob
 
-    # Do a final check that we have apparently received a pdf as expected.
-    if pdf_request.headers['content-type'] != 'application/pdf':
-        raise ValueError('JSTOR did not return a pdf when expected - got response MIME content type of ' + pdf_request.headers['content-type'])
+        """
 
-    jstor_data_dict['blob'] = pdf_request.content
+        view_uri = f'{self._base_url}{self._prev_path}{str(document_id)}'
 
-    return jstor_data_dict
+        print(self._rewrite_rule(view_uri))
+        print(self._session.headers)
 
-# --------------------------------------------------
-# Code that runs test:
+        # Send the request
+        page_request = self._session.get(self._rewrite_rule(view_uri))
 
-test_uri = ''    
+        # View response
+        if page_request.status_code != 200:
+            print(page_request.text)
+            raise ValueError(f'Received response code {page_request.status_code}')
 
-cookies = parse_cookies(AUTH_COOKIE)
+        # Build DOM model
+        view_page_soup = BeautifulSoup(page_request.content, 'html.parser')
 
-session = requests.Session()
+        # Most of the JSTOR page is built dynamically, so there's nothing to scrape directly :'(
+        # Try to get document metadata from Google Analytics script block. 
+        # TODO: consider adding any missing fields from elsewhere?
+        try:
+            jstor_metadata_script = view_page_soup.head.find('script', attrs={'data-analytics-provider':'ga'}).string
 
-session.cookies.update(cookies)
+            jstor_metadata_match = re.search(r'gaData.content = (?P<dict>{[^}]+});', jstor_metadata_script)
 
-initreq = get_payload_data(PAPER_ID, session)
+            jstor_data_dict = ast.literal_eval(jstor_metadata_match.group('dict'))
+        except TypeError as exc:
+            raise ValueError('Unable to get document metadata from JSTOR response') from exc
 
-outfile = open(OUT_FILE, 'xb')
+        # Now try download the pdf
+        pdf_uri = f'{self._base_url}{self._pdf_path}{str(document_id)}.pdf'
 
-outfile.write(initreq['blob'])
+        pdf_request = self._session.get(self._rewrite_rule(pdf_uri))
 
-outfile.close()
+        # JSTOR may ask us to request terms and conditions - have to send a new request accepting them
+        if re.match(r'text/html', pdf_request.headers['content-type']):
+            print('wompwomp')
 
-session.close()
+            pdf_page_soup = BeautifulSoup(pdf_request.content, 'html.parser')
+
+            accept_form = pdf_page_soup.find('form', attrs = {'method': 'POST', 'action': re.compile(r'/tc/verify')})
+
+            csrf_token = accept_form.find('input', attrs = {'name': 'csrfmiddlewaretoken'})['value']
+
+            pdf_request_payload = {'csrfmiddlewaretoken' : csrf_token}
+
+            # Update URI according to action from prior request
+            pdf_uri = f'{self._base_url}{accept_form["action"]}'
+
+            print(pdf_uri)
+
+            pdf_request = self._session.post(self._rewrite_rule(pdf_uri), data = pdf_request_payload)
+
+        # Do a final check that we have apparently received a pdf as expected.
+        if pdf_request.headers['content-type'] != 'application/pdf':
+            raise ValueError('JSTOR did not return a pdf when expected - got response MIME content type of ' + pdf_request.headers['content-type'])
+
+        return JstorArticle(jstor_data_dict, pdf_request.content)

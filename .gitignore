@@ -133,3 +133,6 @@ dmypy.json
 node_modules/
 npm-debug.log
 yarn-error.log
+
+# Secure files that we don't want uploaded
+cookiefile.txt
