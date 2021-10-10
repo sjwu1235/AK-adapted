@@ -1,6 +1,8 @@
 # information-retrieval <!-- omit in toc -->
 
-A python program
+A python program designed to scrape articles from JSTOR based on a masterlist
+of academic journals. Users of this program will have to have access to an 
+afflianted institution's username and password. 
 
 ## Table of Contents <!-- omit in toc -->
 
@@ -13,8 +15,10 @@ A python program
 
 ## Quick Start
 
-1. go through all the Prerequisites in [Prerequisites](docs/prerequisites.md)
-2. run `npm i`
+1. Create a .json file in the cloned directory called uctpw.json. Fill out 
+your institution username and password in the following format; 
+{"user":"Your user name ", "pass":" Your password "}
+2. run the main program file. 
 
 If you run into issues, see the additional docs below **[bottom of page](#Additional-Docs)**
 
@@ -26,11 +30,6 @@ Before contributing **please read through everything in [Contributing](docs/cont
 
 ## Run The Application
 
-```bash
-docker compose up
-```
-
-This will automatically start the flask application via a local server at localhost:5000 and the mysql database.
 
 **[⬆ back to top](#table-of-contents)**
 
