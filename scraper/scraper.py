@@ -70,8 +70,9 @@ class JstorArticle:
             * path (Path): Path object providing location for data to be saved to
         """
 
-        with path.open(path, 'xb') as p:
+        with path.open(mode='xb') as p:
             p.write(self._pdf_blob)
+            p.close()
 
 
 class JstorScraper:
@@ -367,8 +368,8 @@ class JstorScraper:
             raise DownloadException(f'''Could not successfully download PDF
                                                Response content-type was {pdf_request.headers['content-type']}
                                             ''')
-
-        return JstorArticle(metadata, pdf_request.content)
+        print(document_id)
+        return JstorArticle(metadata, pdf_request.content,document_id)
 
     
     # Loads JSTOR pages and finds link to download PDF
