@@ -141,11 +141,23 @@ for article in articles:
         db=pdf.metadata_json
         author=db['authors'][0]
         initial=author[0]
-        middlename=author.split(" ", 1)[1].rsplit(" ", 1)[0]
-        surname=author.split(" ", 1)[1].rsplit(" ", 1)[1]
-        
-        if (middlename>surname):
-            surname=middlename
+        #middlename=author.split(" ", 1)[1].rsplit(" ", 1)[0]
+        #surname=author.split(" ", 1)[1].rsplit(" ", 1)[1]
+
+        names = re.match(r'^\W*((?P<surname>\w+), ?)?((?P<firstname>\w+).? )((?P<namei>\w+).? )*(?P<surname2>\w+)\W*$', author)
+
+        if names == None:
+            initial = "Unknown"
+            surname = "Unknown"
+        else:
+            if names['surname'] != None:
+                surname = names['surname']
+            else:
+                surname = names['surname2']
+            initial = names['namei'][0]
+
+        #if (middlename>surname):
+        #    surname=middlename
             
         jsondata={
             "JournalName": db['journal'],

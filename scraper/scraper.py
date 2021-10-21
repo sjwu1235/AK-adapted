@@ -320,7 +320,7 @@ class JstorScraper:
 
         # Now it will try to open new tab with pdf.
         try:
-            WebDriverWait(self._driver, 5).until(
+            WebDriverWait(self._driver, 100).until(
                 expected_conditions.new_window_is_opened(tab_list)
             )
         except TimeoutException as e:
