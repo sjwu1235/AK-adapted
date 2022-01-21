@@ -48,10 +48,19 @@ class UctConnectionController(ConnectionController):
         driver.find_element_by_xpath(r".//span[@id='submitButton']").click()
         
         print('Checking for successful logon', end = '\r')
+        
+        
         try:
             WebDriverWait(driver, self.DEFAULT_TIMEOUT).until(
-                expected_conditions.element_to_be_clickable((By.XPATH, r"//button[@data-sc='but click:search']"))
+                expected_conditions.element_to_be_clickable((By.XPATH, r"//input[@id='query-builder-input']"))
             )
+            print("passed")
+            WebDriverWait(driver, self.DEFAULT_TIMEOUT).until(
+                expected_conditions.element_to_be_clickable((By.XPATH, r"//button[@id='onetrust-accept-btn-handler']"))
+            )
+            driver.find_element_by_xpath(r".//button[@id='onetrust-accept-btn-handler']").click()
+            print('cookies accepted')
         except:
             print("Unable to load search page")
             raise
+        
