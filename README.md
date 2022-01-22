@@ -1,12 +1,13 @@
 # information-retrieval <!-- omit in toc -->
 
-A python program designed to scrape articles from JSTOR based on some user specified fields. This is a two stage process:
+A python program to scrape articles from JSTOR based on some user specified fields. This is a two stage process:
 1. Stage_1_scraper.py scrapes the specified journal page on JSTOR for all issue links and then iterates through each issue page to get links to the first article of each issue eg: a pivot point.
 2. Given a year range, Stage_2_scraper.py scrapes articles issue by issue using the pivots excel file from stage 1 and dumps metadata scraped from each article page into datadump.xlsx at the end of scraping an issue.
 
-Users of this program will have to have access to an afflianted institution's username and password. 
+Users of this program will have to have access to an affliated institution's username and password.
 
-Note: a potential inefficiency exists. It is possible to scrape all URLs or download the citations in bulk from the journal page. Then directly query these URLs rather than navigating the issue using 'next' and 'previous' buttons. However, it is uncertain if this method will raise reCAPTCHA issues. Still cannot confidently confirm if uBlock has defeated reCAPTCHA.
+Note: 
+1. a potential inefficiency exists. It is possible to scrape all URLs or download the citations in bulk from the journal page. Then directly query these URLs rather than navigating the issue using 'next' and 'previous' buttons. However, it is uncertain if this method will raise reCAPTCHA issues. Still cannot confidently confirm if uBlock has defeated reCAPTCHA.
 
 This is based off the original Aaron's Kit scraper program hosted at [https://github.com/FinHubSA/information-retrieval](FinHubSA)
 
