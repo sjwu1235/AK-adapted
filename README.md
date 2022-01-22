@@ -13,9 +13,10 @@ This is based off the original Aaron's Kit scraper program hosted at [https://gi
 ## Table of Contents <!-- omit in toc -->
 
 <!-- TOC -->
-- [Set up](#set-up)
+- [Assumptions](#assumptions)
+- [Quick start](#quick-start)
 - [Speed test](#speed-test)
-- [Run The Application](#run-the-application)
+- [Run The Applications](#run-the-applications)
 - [Additional Docs](#additional-docs)
 <!-- /TOC -->
 ## Assumptions: 
@@ -25,7 +26,8 @@ This is based off the original Aaron's Kit scraper program hosted at [https://gi
 * You know the basics of installing python programs and running code in an IDE
 * You have installed all the packages used in the alt_scraper.py and alt_scraper2.py file 
     * If not just type in ‘pip install packagename’ in the command terminal of your IDE
-## Set up
+
+## Quick start
 1. Create a .json file in the cloned source directory called uctpw.json. Fill out 
 your institution username and password in the following format; 
 {"user":"Your user name ", "pass":" Your password "}
@@ -43,6 +45,7 @@ your institution username and password in the following format;
  "end_year": year to stop scraping (inclusive) eg: 2020, 
  "sleep_time": time taken to download pdf in speed test. Suggest 20 or longer}
 7. Note: When editing inputs.json, replace all single "\" characters in file paths with "\\" eg: "C:\Users\xxxx\Journal_Data" to "C:\\Users\\xxxx\\Journal_Data"
+8. Run the scrapers. First Stage_1_scraper.py then Stage_2_scraper.py. See [Run The Applications](#run-the-applications) for details
 
 ## Speed test
 ### Option 1
@@ -52,14 +55,15 @@ Newer papers can get as large as 5mb, so the scraper needs enough time to finish
 ### Option 2
 Alternatively, run a speed test. Google 'speed test' and run as below. The internet speed test below shows a connection that was able to handle downloading 140 papers per hour using a 20s sleep time without crashing. Take note of your download speed and latency compared to that in the reference and adjust the sleep_time field in inputs.json accordingly.
 ![image](https://user-images.githubusercontent.com/80747408/150647684-3ec48cbb-7abb-4f83-8fcd-227e0ab1b169.png)
-![image](https://user-images.githubusercontent.com/80747408/150647720-74abdf3e-464c-4411-bc05-98617674ace3.png)
+![image](https://user-images.githubusercontent.com/80747408/150648457-71e175df-54d3-44d4-8b26-b13dddce3cd1.png)
+
 
 ### Note
 The suggested minimum is 20 seconds for the sleep_time field in inputs.json. At 20 seconds sleep_time, this scraper was able to download 140 papers per hour during test runs without crashing. It should deliver the same performance provided your internet speed is as good or better than the speed test screenshot above (20mbps download, 6mbps upload, 40ms latency). If not, please set a higher sleep time. If you believe in your internet speed, perhaps you can get away with less.
 
 
-## Run The Application
-In the command line: run the journal issue scraper
+## Run The Applications
+Run the journal issue scraper
 ```
 python Stage_1_scraper.py
 ```
@@ -69,7 +73,9 @@ Run article scraper
 ```
 python Stage_2_scraper.py
 ```
-In the event of a stall, eg: page taking too long to load or a recaptcha, the script will instruct you to resolve the URL and allow it to continue. Hence, I don't reccomend setting the window to headless in the code as you may be required to help the scraper sometimes.
+In the event of a stall, eg: page taking too long to load or a reCAPTCHA, the script will instruct you to resolve the URL and allow it to continue. Hence, I don't reccomend setting the window to headless as you may be required to help the scraper sometimes.
+
+
 
 **detailed stall troubleshooting **
 Still to come
