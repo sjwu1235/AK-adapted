@@ -13,10 +13,9 @@ This is based off the original Aaron's Kit scraper program hosted at [https://gi
 ## Table of Contents <!-- omit in toc -->
 
 <!-- TOC -->
-- [Quick Start](#quick-start)
-- [Contributing](#contributing)
-- [Run The Application](#run-the-application)
+- [Set up](#set-up)
 - [Speed test](#speed-test)
+- [Run The Application](#run-the-application)
 - [Additional Docs](#additional-docs)
 <!-- /TOC -->
 ## Assumptions: 
@@ -26,7 +25,7 @@ This is based off the original Aaron's Kit scraper program hosted at [https://gi
 * You know the basics of installing python programs and running code in an IDE
 * You have installed all the packages used in the alt_scraper.py and alt_scraper2.py file 
     * If not just type in ‘pip install packagename’ in the command terminal of your IDE
-## Quick Start
+## Set up
 1. Create a .json file in the cloned source directory called uctpw.json. Fill out 
 your institution username and password in the following format; 
 {"user":"Your user name ", "pass":" Your password "}
@@ -46,26 +45,34 @@ your institution username and password in the following format;
 7. Note: When editing inputs.json, replace all single "\" characters in file paths with "\\" eg: "C:\Users\xxxx\Journal_Data" to "C:\\Users\\xxxx\\Journal_Data"
 
 ## Speed test
+### Option 1
 Conduct a speed test manually to test hardware and download speed. Go to JSTOR and download a paper from the 2010 decade. Take note of how long it takes for the pdf popup to fully load and then how long it takes for a download of the pdf to complete.
-Newer papers can get as large as 10mb so enough time needs to be given to the scraper to finish the download and return to the JSTOR page.
+Newer papers can get as large as 5mb, so the scraper needs enough time to finish the download and return to the JSTOR page.
 
-Alternatively, run a speed test. Google 'speed test' and run as below. Take note of the download speed and adjust the sleep_time field in inputs.json accordingly.
+### Option 2
+Alternatively, run a speed test. Google 'speed test' and run as below. The internet speed test below shows a connection that was able to handle downloading 140 papers per hour using a 20s sleep time without crashing. Take note of your download speed and latency compared to that in the reference and adjust the sleep_time field in inputs.json accordingly.
+![image](https://user-images.githubusercontent.com/80747408/150647684-3ec48cbb-7abb-4f83-8fcd-227e0ab1b169.png)
+![image](https://user-images.githubusercontent.com/80747408/150647720-74abdf3e-464c-4411-bc05-98617674ace3.png)
 
-The suggested minimum is 20 seconds for the sleep_time field in inputs.json but if you believe in your internet speed, you can get away with less. At 20 seconds sleep time, this scraper will download 140 papers per hour.
-
-
-**screenshot of google speed test**
+### Note
+The suggested minimum is 20 seconds for the sleep_time field in inputs.json. At 20 seconds sleep_time, this scraper was able to download 140 papers per hour during test runs without crashing. It should deliver the same performance provided your internet speed is as good or better than the speed test screenshot above (20mbps download, 6mbps upload, 40ms latency). If not, please set a higher sleep time. If you believe in your internet speed, perhaps you can get away with less.
 
 
 ## Run The Application
-In command line
-Run journal issue scraper
-python alt_scraper2.py
-Run article scraper
-python alt_scraper.py
-In the event of a stall, the scraper will require you to resolve the URL or stall and allow it to continue. Hence, I don't reccomend setting the window to headless in the code.
-**detailed stall troubleshooting**
+In the command line: run the journal issue scraper
+```
+python Stage_1_scraper.py
+```
+After navigating to the journal page, manually verify that the scraper expands all the decade fields. This will take about 2 minutes. This is to ensure that all issue URLs are scraped in this stage. Thereafter, you can leave it undisturbed to run. This scraper will iterate through each issue of the journal and scrape the issue's first article URL which will be used in the stage_2_scraper. The output from this scraper will be saved to whatever excel file path is in the 'pivots' field of inputs.json.
 
+Run article scraper
+```
+python Stage_2_scraper.py
+```
+In the event of a stall, eg: page taking too long to load or a recaptcha, the script will instruct you to resolve the URL and allow it to continue. Hence, I don't reccomend setting the window to headless in the code as you may be required to help the scraper sometimes.
+
+**detailed stall troubleshooting **
+Still to come
 
 
 ## Contributing
