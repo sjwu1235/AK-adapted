@@ -24,7 +24,7 @@ This is based off the original Aaron's Kit scraper program hosted at [https://gi
 * You have Visual Studio Code or Spyder IDE installed on your machine 
 * You have an excel reader installed on your machine
 * You know the basics of installing python programs and running code in an IDE
-* You have installed all the packages used in the alt_scraper.py and alt_scraper2.py file 
+* You have installed all the packages used in the Stage_1_scraper.py and Stage_2_scraper.py file 
     * If not just type in ‘pip install packagename’ in the command terminal of your IDE
 
 ## Quick start
