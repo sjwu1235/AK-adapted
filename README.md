@@ -53,13 +53,10 @@ Conduct a speed test manually to test hardware and download speed. Go to JSTOR a
 Newer papers can get as large as 5mb, so the scraper needs enough time to finish the download and return to the JSTOR page.
 
 ### Option 2
-Alternatively, run a speed test. Google 'speed test' and run as below. The internet speed test below shows a connection that was able to handle downloading 140 papers per hour using a 20s sleep time without crashing. Take note of your download speed and latency compared to that in the reference and adjust the sleep_time field in inputs.json accordingly.
-![image](https://user-images.githubusercontent.com/80747408/150647684-3ec48cbb-7abb-4f83-8fcd-227e0ab1b169.png)
-![image](https://user-images.githubusercontent.com/80747408/150648457-71e175df-54d3-44d4-8b26-b13dddce3cd1.png)
+Alternatively, run a speed test (google 'speed test'). The internet speed test below shows a connection that was able to handle downloading 140 papers per hour using a 20s sleep time without crashing over a 12 hour period. Take note of your download speed and latency compared to that in the reference and adjust the sleep_time field in inputs.json accordingly. It should deliver similar performance provided your internet speed is as good or better than the speed test screenshot above (20mbps download, 10mbps upload, 40ms latency). If not, please set a higher sleep time.
 
 
-### Note
-The suggested minimum is 20 seconds for the sleep_time field in inputs.json. At 20 seconds sleep_time, this scraper was able to download 140 papers per hour during test runs without crashing. It should deliver the same performance provided your internet speed is as good or better than the speed test screenshot above (20mbps download, 6mbps upload, 40ms latency). If not, please set a higher sleep time. If you believe in your internet speed, perhaps you can get away with less.
+![image](https://user-images.githubusercontent.com/80747408/150649316-f92d129e-5aee-490d-8c84-4ca3eca4ab3a.png)
 
 
 ## Run The Applications
