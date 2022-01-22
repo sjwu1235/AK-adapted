@@ -6,8 +6,7 @@ A python program to scrape articles from JSTOR based on some user specified fiel
 
 Users of this program will have to have access to an affliated institution's username and password.
 
-Note: 
-1. a potential inefficiency exists. It is possible to scrape all URLs or download the citations in bulk from the journal page. Then directly query these URLs rather than navigating the issue using 'next' and 'previous' buttons. However, it is uncertain if this method will raise reCAPTCHA issues. Still cannot confidently confirm if uBlock has defeated reCAPTCHA.
+Note: a potential inefficiency exists. It is possible to scrape all URLs or download the citations in bulk from the journal page. Then directly query these URLs rather than navigating the issue using 'next' and 'previous' buttons. However, it is uncertain if this method will raise reCAPTCHA issues. Still cannot confidently confirm if uBlock has defeated reCAPTCHA.
 
 This is based off the original Aaron's Kit scraper program hosted at [https://github.com/FinHubSA/information-retrieval](FinHubSA)
 
