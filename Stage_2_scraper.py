@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 import time
 import pandas as pd
+from plyer import notification
+
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
@@ -72,6 +74,7 @@ for ind in URL_starts.index:
             WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "metadata-info-tab")))
             WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.ID, "issue-pager")))
         except:
+            notification.notify(title='Scraper stall', message='Resolve reCAPTCHA/stall issue',app_name="Scraper", app_icon=None,timeout=10)
             print("Article page not loading")
             print("Please resolve page to" + driver.current_url)
             print("Then enter to continue")
@@ -82,7 +85,7 @@ for ind in URL_starts.index:
         #check if it's been downloaded already
         if datadump[['stable_url']].isin({'stable_url': [url]}).all(1).any():
             try: 
-                WebDriverWait(driver, 20).until(
+                WebDriverWait(driver, 10).until(
                     expected_conditions.presence_of_element_located((By.ID, 'metadata-info-tab'))
                     ) 
                 driver.find_element_by_xpath(r".//content-viewer-pharos-link[@data-sc='text link:next item']").click()
@@ -111,31 +114,35 @@ for ind in URL_starts.index:
 
         # edge case: some do have author affiliation and some do not
         affiliations=""
-        try:
-            WebDriverWait(driver, 20).until(
-                    expected_conditions.presence_of_element_located((By.CLASS_NAME, 'contrib-group'))
-                    ) 
-            author_info=driver.find_elements_by_xpath(r".//div[@class='contrib-group']//div//span")
-            count=0
-            for item in author_info:
-                if (count%2) == 0:
-                    affiliations=affiliations+item.text+' - '
-                else:
-                    affiliations=affiliations+item.text+'. '
-                count+=1
-            print(affiliations)
-        except:
-            print('no author affiliation') 
-            
+        if (input_deets['afilliations']==1):
+            try:
+                WebDriverWait(driver, 10).until(
+                        expected_conditions.presence_of_element_located((By.CLASS_NAME, 'contrib-group'))
+                        ) 
+                author_info=driver.find_elements_by_xpath(r".//div[@class='contrib-group']//div//span")
+                count=0
+                for item in author_info:
+                    if (count%2) == 0:
+                        affiliations=affiliations+item.text+' - '
+                    else:
+                        affiliations=affiliations+item.text+'. '
+                    count+=1
+                print(affiliations)
+            except:
+                print('no author affiliation') 
+                
 
         journal=driver.find_element_by_xpath(r".//div[@data-qa='journal']").text
         src_info=driver.find_element_by_xpath(r".//div[@data-qa='item-src-info']").text
         
         # text processing for pages and page numbers
         temp2=src_info.split()
-        no_pages=temp2[-1][1:-1]
-        pages=temp2[-2]
-
+        print(temp2)
+        
+        no_pages=temp2[-2][1:]
+        pages=temp2[-3]
+        print(no_pages)
+        print(pages)
         # some articles are rather reviews or comments or replies and will not have abstracts
         abstract=""
         try:
