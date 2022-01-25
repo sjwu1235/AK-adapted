@@ -138,12 +138,9 @@ for ind in URL_starts.index:
         
         # text processing for pages and page numbers
         temp2=src_info.split()
-        print(temp2)
-        
         no_pages=temp2[-2][1:]
         pages=temp2[-3]
-        print(no_pages)
-        print(pages)
+
         # some articles are rather reviews or comments or replies and will not have abstracts
         abstract=""
         try:
