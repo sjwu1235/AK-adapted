@@ -56,7 +56,7 @@ driver.get(URL)
 
 WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "facets-container")))
 
-cols=['year', 'month', 'volume', 'issue','issue_url','Jstor_issue_text','journal', 'pivot_url']
+cols=['year', 'month', 'volume', 'issue','issue_url','Jstor_issue_text','journal', 'pivot_url', 'no_docs']
 data=pd.DataFrame(columns=cols)
 
 click=driver.find_elements_by_xpath(r".//dl[@class='facet accordion']//dl//dt//a")
@@ -78,11 +78,11 @@ for element in decade_List:
     for item in year_list:
         uct_stable_url=item.get_attribute('href')
         Jstor_issue_text=item.text
-        data=data.append(pd.Series([int(temp), None, None, None, uct_stable_url, Jstor_issue_text, 'AER', None], index=data.columns), ignore_index=True )
+        data=data.append(pd.Series([int(temp), None, None, None, uct_stable_url, Jstor_issue_text, 'AER', None, None], index=data.columns), ignore_index=True )
 
-for ind in data.index:        
+for ind in data.index:   
+    time.sleep(1)     
     driver.get(data['issue_url'][ind])
-    
     try:
         WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "bulk_citation_export_form")))
     except:
@@ -91,10 +91,16 @@ for ind in data.index:
         input()
 
     data['pivot_url'][ind]=driver.find_element_by_xpath(r".//div[@class='media-body media-object-section main-section']//div[@class='stable']").text
+    all_urls=driver.find_elements_by_xpath(r".//div[@class='media-body media-object-section main-section']//div[@class='stable']")
+    data['no_docs'][ind]=len(all_urls)
     issue_data=driver.find_element_by_xpath(r".//h1//div[@class='issue']").text.split(',')
     print(issue_data)
+    print(len(all_urls))
     data['volume'][ind]=int(issue_data[0].split()[1])
-    data['issue'][ind]=issue_data[1].split()[1].replace('/','-')
-    data['month'][ind]=issue_data[2].split()[0]
+    try:
+        data['issue'][ind]=issue_data[1].split()[1].replace('/','-')
+        data['month'][ind]=issue_data[2].split()[0]
+    except:
+        print('No issue or month metadata. Possibly is supplement, index or special issue')
 
 data.to_excel(input_deets['pivots'], index=False)

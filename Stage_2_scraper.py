@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import time
 import pandas as pd
-from plyer import notification
+import os.path
 
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
@@ -74,18 +74,18 @@ for ind in URL_starts.index:
             WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "metadata-info-tab")))
             WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.ID, "issue-pager")))
         except:
-            notification.notify(title='Scraper stall', message='Resolve reCAPTCHA/stall issue',app_name="Scraper", app_icon=None,timeout=10)
             print("Article page not loading")
             print("Please resolve page to" + driver.current_url)
             print("Then enter to continue")
             input()
         
         url=driver.find_element_by_xpath(r".//div[@class='stable-url']").text
+        path = directory+"\\"+url.split("/")[-1]+".pdf"
         
         #check if it's been downloaded already
-        if datadump[['stable_url']].isin({'stable_url': [url]}).all(1).any():
+        if (datadump[['stable_url']].isin({'stable_url': [url]}).all(1).any())&(os.path.isfile(path)):
             try: 
-                WebDriverWait(driver, 10).until(
+                WebDriverWait(driver, 20).until(
                     expected_conditions.presence_of_element_located((By.ID, 'metadata-info-tab'))
                     ) 
                 driver.find_element_by_xpath(r".//content-viewer-pharos-link[@data-sc='text link:next item']").click()
@@ -93,6 +93,7 @@ for ind in URL_starts.index:
                 print("was not able to go to next item")
                 print("seems to have reached end of issue")
                 x=1
+                datadump.to_excel(datadump_loc,index=False)  
             continue
         
         #scrape rest of metadata on panel
@@ -114,7 +115,7 @@ for ind in URL_starts.index:
 
         # edge case: some do have author affiliation and some do not
         affiliations=""
-        if (input_deets['afilliations']==1):
+        if (input_deets['affiliations']==1):
             try:
                 WebDriverWait(driver, 10).until(
                         expected_conditions.presence_of_element_located((By.CLASS_NAME, 'contrib-group'))
@@ -151,24 +152,26 @@ for ind in URL_starts.index:
             abstract=None
 
         #click download
-        driver.find_element_by_xpath(r".//mfe-download-pharos-button[@data-sc='but click:pdf download']").click()
+        if not os.path.isfile(path):
+            driver.find_element_by_xpath(r".//mfe-download-pharos-button[@data-sc='but click:pdf download']").click()
         
-        # bypass t&c
-        try:
-            WebDriverWait(driver, 10).until(
-                expected_conditions.presence_of_element_located((By.ID, 'content-viewer-container'))
-                ) 
-            driver.find_element_by_xpath(r".//mfe-download-pharos-button[@data-qa='accept-terms-and-conditions-button']").click()
-            print("t&c bypassed")
-        except:
-            print("no t&c")
+            # bypass t&c
+            try:
+                WebDriverWait(driver, 10).until(
+                    expected_conditions.presence_of_element_located((By.ID, 'content-viewer-container'))
+                    ) 
+                driver.find_element_by_xpath(r".//mfe-download-pharos-button[@data-qa='accept-terms-and-conditions-button']").click()
+            except:
+                print("no t&c")
+
+            #need to allow time for download to complete and return to initial page
+            time.sleep(sleep_time)
 
         #inserting this thing
-        dict = {'stable_url': url, 'authors': author, 'content_type': content_type, 'reviewed_work': reviewed_work, 'title': title, 'abstract': abstract, 'src_info':src_info, 'affiliations':affiliations, 'issue_url':URL_starts['pivot_url'][ind], 'pages': pages,"no_pages": no_pages}
-        datadump=datadump.append(dict, ignore_index=True)
-
-        #need to allow time for download to complete and return to initial page
-        time.sleep(sleep_time)
+    
+        if (not datadump[['stable_url']].isin({'stable_url': [url]}).all(1).any())&(os.path.isfile(path)):
+            dict = {'stable_url': url, 'authors': author, 'content_type': content_type, 'reviewed_work': reviewed_work, 'title': title, 'abstract': abstract, 'src_info':src_info, 'affiliations':affiliations, 'issue_url':URL_starts['pivot_url'][ind], 'pages': pages,"no_pages": no_pages}
+            datadump=datadump.append(dict, ignore_index=True)
         
         # try move to the next article, if it doesn't work, it dumps the data assuming the end of the issue has been reached
         try: 
@@ -177,9 +180,17 @@ for ind in URL_starts.index:
                 ) 
             driver.find_element_by_xpath(r".//content-viewer-pharos-link[@data-sc='text link:next item']").click()
         except:
-            print("Was not able to go to next item. Seems to have reached end of issue")
-            datadump.to_excel(datadump_loc,index=False)     
-            x=1
+            try: 
+                WebDriverWait(driver, 20).until(
+                expected_conditions.presence_of_element_located((By.XPATH, r".//content-viewer-pharos-link[@data-sc='text link:previous item']"))
+                ) 
+                print("Was not able to go to next item. Seems to have reached end of issue")
+                datadump.to_excel(datadump_loc,index=False)     
+                x=1
+            except:
+                print("Stall, possible recaptcha, please resolve stall to "+url)
+                print("Enter to continue once page is resolved")
+                input()
         
         print(datadump.shape[0])
         print(driver.current_url)
