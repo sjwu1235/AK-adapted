@@ -26,12 +26,12 @@ chrome_options = webdriver.ChromeOptions()
 # not reccommended
 #chrome_options.add_argument('--headless')
 
-chrome_options.add_argument(f'user-agent={USER_AGENT}')
-chrome_options.add_argument('--disable-blink-features=AutomationControlled')
-chrome_options.add_extension('./extension_1_38_6_0.crx')
+chrome_options.add_argument(f"user-agent={USER_AGENT}")
+chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+chrome_options.add_extension("./extension_1_38_6_0.crx")
 chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 chrome_options.add_experimental_option("useAutomationExtension", False)
-chrome_options.add_experimental_option('prefs', {
+chrome_options.add_experimental_option("prefs", {
     "download.default_directory": directory, #Change default directory for downloads
     "download.prompt_for_download": False, #To auto download the file
     "download.directory_upgrade": True,
