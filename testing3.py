@@ -1,3 +1,22 @@
 # todo
-# make script to sort files can use dump file and issue_url to link to journal's issue list
-# https://www.geeksforgeeks.org/make-multiple-directories-based-on-a-list-using-python/#:~:text=Declare%20the%20root%20directory%20where,our%20python%20ide%20is%20installed.
+import json
+from pathlib import Path
+import pathlib
+import time
+import pandas as pd
+import os.path
+import selenium 
+import re
+import abc
+import random
+import math
+import openpyxl
+
+import webdriver_manager
+
+print(selenium.__version__)
+print(json.__version__)
+print(pd.__version__)
+print(re.__version__)
+print(openpyxl.__version__)
+print(webdriver_manager.__version__)

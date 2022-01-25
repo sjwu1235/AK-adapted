@@ -44,17 +44,23 @@ driver = webdriver.Chrome(ChromeDriverManager().install(), options = chrome_opti
 
 driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
-with open(r'uctpw.json', 'r') as logon_file:
-    logon_deets = json.load(logon_file)
-
-web_session = UctConnectionController(driver, 
-                                      'https://www.jstor.org',
-                                      logon_deets['user'],
-                                      logon_deets['pass'])
-
 driver.get(URL)
+try:
+    WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "facets-container")))
+    print("passed")
+    time.sleep(5)
+    WebDriverWait(driver, 20).until(
+        expected_conditions.element_to_be_clickable((By.XPATH, r"//button[@id='onetrust-accept-btn-handler']"))
+    )
 
-WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "facets-container")))
+    driver.find_element_by_xpath(r".//button[@id='onetrust-accept-btn-handler']").click()
+    print('cookies accepted')
+except:
+    print("Failed to access journal page")
+    raise
+    
+
+time.sleep(10)
 
 cols=['year', 'month', 'volume', 'issue','issue_url','Jstor_issue_text','journal', 'pivot_url', 'no_docs']
 data=pd.DataFrame(columns=cols)
@@ -76,21 +82,23 @@ for element in decade_List:
         continue
     print(temp)
     for item in year_list:
-        uct_stable_url=item.get_attribute('href')
+        uct_stable_url="https://www-jstor-org.ezproxy.uct.ac.za/"+item.get_attribute('href')[22:]
+        print(uct_stable_url)
         Jstor_issue_text=item.text
-        data=data.append(pd.Series([int(temp), None, None, None, uct_stable_url, Jstor_issue_text, 'AER', None, None], index=data.columns), ignore_index=True )
+        data=data.append(pd.Series([int(temp), None, None, None, uct_stable_url, Jstor_issue_text, input_deets["journal_name"], None, None], index=data.columns), ignore_index=True )
 
 for ind in data.index:   
     time.sleep(1)     
-    driver.get(data['issue_url'][ind])
+    driver.get("https://www.jstor.org/"+data['issue_url'][ind][40:])
     try:
         WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "bulk_citation_export_form")))
     except:
-        print("Timed out: manually resolve the page to "+data['issue_url'][ind])
+        print("Timed out: manually resolve the page to https://www.jstor.org/"+data['issue_url'][ind][40:])
         print("Press enter to continue after page completely loads")
         input()
 
-    data['pivot_url'][ind]=driver.find_element_by_xpath(r".//div[@class='media-body media-object-section main-section']//div[@class='stable']").text
+    data['pivot_url'][ind]="https://www-jstor-org.ezproxy.uct.ac.za/"+driver.find_element_by_xpath(r".//div[@class='media-body media-object-section main-section']//div[@class='stable']").text[22:]
+    print(data['pivot_url'][ind])
     all_urls=driver.find_elements_by_xpath(r".//div[@class='media-body media-object-section main-section']//div[@class='stable']")
     data['no_docs'][ind]=len(all_urls)
     issue_data=driver.find_element_by_xpath(r".//h1//div[@class='issue']").text.split(',')
