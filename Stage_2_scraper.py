@@ -3,14 +3,15 @@ from pathlib import Path
 import time
 import pandas as pd
 import os.path
-
+import random
+import re
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
 
-from connection_controllers.uct_connection_controller import UctConnectionController
+from connection_controllers.gen_connection_controller import GenConnectionController
 
 with open(r'inputs.json', 'r') as input_file:
 
@@ -35,7 +36,8 @@ curdir = Path.cwd().joinpath("BrowserProfile")
 
 chrome_options.add_argument(f"user-agent={USER_AGENT}")
 chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-chrome_options.add_extension("./extension_1_38_6_0.crx")
+#chrome_options.add_extension("./extension_1_38_6_0.crx")
+#chrome_options.add_extension("./extension_busters.crx")
 chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 chrome_options.add_experimental_option("useAutomationExtension", False)
 chrome_options.add_experimental_option("prefs", {
@@ -51,23 +53,17 @@ driver = webdriver.Chrome(ChromeDriverManager().install(), options = chrome_opti
 
 driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
-with open(r'uctpw.json', 'r') as logon_file:
-
-    logon_deets = json.load(logon_file)
-
-web_session = UctConnectionController(driver, 
-                                      "https://www.jstor.org",
-                                      logon_deets['user'],
-                                      logon_deets['pass'])
-
+web_session = GenConnectionController(driver, "https://www.jstor.org")
+lib_URL=re.search('https://(.+?)/', driver.current_url).group(1)
 starts = pd.read_excel(start_loc)
 URL_starts = starts[(starts['year']>=start_year)&(starts['year']<=end_year)]
-
+throttle=0
+random.seed(time.time())
 for ind in URL_starts.index:
     print("New Issue "+ URL_starts['Jstor_issue_text'][ind])
     # point it at some Jstor start page
-    driver.get(URL_starts['pivot_url'][ind])
-    
+    driver.get(re.sub('https://(.+?)/', 'https://'+lib_URL+'/', URL_starts['pivot_url'][ind]))
+    time.sleep(5+sleep_time*random.random())    
     x=0
     while x==0:
         try:
@@ -88,6 +84,7 @@ for ind in URL_starts.index:
                 WebDriverWait(driver, 20).until(
                     expected_conditions.presence_of_element_located((By.ID, 'metadata-info-tab'))
                     ) 
+                time.sleep(3)
                 driver.find_element_by_xpath(r".//content-viewer-pharos-link[@data-sc='text link:next item']").click()
             except:
                 print("was not able to go to next item")
@@ -97,11 +94,11 @@ for ind in URL_starts.index:
             continue
         
         #scrape rest of metadata on panel
-        content_type=driver.find_element_by_xpath(r".//span[@data-qa='content-type']").text
-
+        content_type=""
         title=""
         author=""
         reviewed_work=""
+        '''
         try:
             title=driver.find_element_by_xpath(r".//content-viewer-pharos-heading[@data-qa='item-title']").text
             author=driver.find_element_by_xpath(r".//div[@class='contrib']").text
@@ -112,7 +109,7 @@ for ind in URL_starts.index:
                 reviewed_work=driver.find_element_by_xpath(r".//div[@class='rw reviewed-work__container']").text
             except:
                 print("review type")
-
+        '''
         # edge case: some do have author affiliation and some do not
         affiliations=""
         if (input_deets['affiliations']==1):
@@ -131,16 +128,19 @@ for ind in URL_starts.index:
                 print(affiliations)
             except:
                 print('no author affiliation') 
-                
 
-        journal=driver.find_element_by_xpath(r".//div[@data-qa='journal']").text
+        
+        # text processing for number of pages
         src_info=driver.find_element_by_xpath(r".//div[@data-qa='item-src-info']").text
         
-        # text processing for pages and page numbers
         temp2=src_info.split()
         no_pages=temp2[-2][1:]
-        pages=temp2[-3]
-
+        #pages=temp2[-3]
+     
+        
+        pages=""
+        #no_pages=""
+        #src_info=""
         # some articles are rather reviews or comments or replies and will not have abstracts
         abstract=""
         try:
@@ -161,8 +161,8 @@ for ind in URL_starts.index:
             except:
                 print("no t&c")
 
-            #need to allow time for download to complete and return to initial page
-            time.sleep(sleep_time)
+        #need to allow time for download to complete and return to initial page
+        time.sleep(5+sleep_time*random.random())
 
         #inserting this thing
     
@@ -181,7 +181,7 @@ for ind in URL_starts.index:
                 WebDriverWait(driver, 20).until(
                 expected_conditions.presence_of_element_located((By.XPATH, r".//content-viewer-pharos-link[@data-sc='text link:previous item']"))
                 ) 
-                print("Was not able to go to next item. Seems to have reached end of issue")
+                print("Has previous. No next. Seems to have reached end of issue")
                 datadump.to_excel(datadump_loc,index=False)     
                 x=1
             except:
@@ -189,5 +189,4 @@ for ind in URL_starts.index:
                 print("Enter to continue once page is resolved")
                 input()
         
-        print(datadump.shape[0])
         print(driver.current_url)
