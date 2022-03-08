@@ -67,8 +67,9 @@ for ind in URL_starts.index:
     x=0
     while x==0:
         try:
+            print('execute 1')
             WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "metadata-info-tab")))
-            WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.ID, "issue-pager")))
+            #WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.ID, "issue-pager")))
         except:
             print("Article page not loading")
             print("Please resolve page to" + driver.current_url)
@@ -81,6 +82,7 @@ for ind in URL_starts.index:
         #check if it's been downloaded already
         if (datadump[['stable_url']].isin({'stable_url': [url]}).all(1).any())&(os.path.isfile(path)):
             try: 
+                print('execute 2')
                 WebDriverWait(driver, 20).until(
                     expected_conditions.presence_of_element_located((By.ID, 'metadata-info-tab'))
                     ) 
@@ -93,23 +95,13 @@ for ind in URL_starts.index:
                 datadump.to_excel(datadump_loc,index=False)  
             continue
         
-        #scrape rest of metadata on panel
-        content_type=""
-        title=""
-        author=""
-        reviewed_work=""
-        '''
+        
+        # some articles are rather reviews or comments or replies and will not have abstracts
+        abstract=""
         try:
-            title=driver.find_element_by_xpath(r".//content-viewer-pharos-heading[@data-qa='item-title']").text
-            author=driver.find_element_by_xpath(r".//div[@class='contrib']").text
+            abstract=driver.find_element_by_xpath(r".//div[@class='abstract']").text
         except:
-            try:
-                title=driver.find_element_by_xpath(r".//pharos-heading[@data-qa='item-title']").text
-                author=driver.find_element_by_xpath(r".//div[@class='contrib review-text']").text
-                reviewed_work=driver.find_element_by_xpath(r".//div[@class='rw reviewed-work__container']").text
-            except:
-                print("review type")
-        '''
+            abstract=None
         # edge case: some do have author affiliation and some do not
         affiliations=""
         if (input_deets['affiliations']==1):
@@ -128,26 +120,70 @@ for ind in URL_starts.index:
                 print(affiliations)
             except:
                 print('no author affiliation') 
-
-        
-        # text processing for number of pages
-        src_info=driver.find_element_by_xpath(r".//div[@data-qa='item-src-info']").text
-        
-        temp2=src_info.split()
-        no_pages=temp2[-2][1:]
-        #pages=temp2[-3]
-     
-        
-        pages=""
-        #no_pages=""
-        #src_info=""
-        # some articles are rather reviews or comments or replies and will not have abstracts
-        abstract=""
+        #locating references
+        ref_raw=''
+        ref_struct=''
+        foot_struct=''
         try:
-            abstract=driver.find_element_by_xpath(r".//div[@class='abstract']").text
-        except:
-            abstract=None
+            #WebDriverWait(driver,10).until(
+            #    expected_conditions.presence_of_element_located((By.ID, 'metadata-info-tab'))
+            #)
+            time.sleep(5)
+            driver.find_element_by_id(r"reference-tab").click()
+            time.sleep(2)
+            WebDriverWait(driver,10).until(
+                expected_conditions.presence_of_element_located((By.ID, 'reference-tab-contents'))
+            )
+            ref_obj=driver.find_elements_by_xpath(r"//div[@id='references']/div/div/ul/li")
+            ref_raw= driver.find_element_by_xpath(r"//div[@id='references']/div").text
+            ref_obj2=driver.find_elements_by_xpath(r"//div[@id='references']/div/div")
+            for element in ref_obj2:
+                if (element.find_element_by_class_name(r"reference-block-title").text=='[Footnotes]'):
+                    for k in element.find_elements_by_xpath(r".//ul/li[@class='reference-list__item']"):
+                        foot_struct+=k.find_element_by_xpath(r".//div/div[@class='media-img']/span[@class='right']").text +'__'
+                        try:
+                           
+                            temp=k.find_elements_by_xpath(".//div/div/div/ul/li")
+                            if len(temp)>0:
+                                for y in temp:
+                                    foot_struct+=y.text+'--'
+                                    try:
+                                        foot_struct+=y.find_element_by_xpath(".//content-viewer-pharos-link").get_attribute('href')+'\n'
+                                    except:
+                                        foot_struct+='no_crossref\n'
+                            else:
+                                raise 1
+                        except:
+                            temp=k.find_element_by_xpath(".//div/div[@class='media-body reference-contains']")
+                            foot_struct+=temp.text+'--'
+                            try:
+                                foot_struct+=temp.find_element_by_xpath(".//content-viewer-pharos-link").get_attribute('href')+'\n'
+                            except:
+                                foot_struct+='no_crossref\n'
+                else:
+                    for k in element.find_elements_by_xpath(r".//ul/li[@class='reference-list__item']"):
+                        ref_struct+=k.text+'--'
+                        try:
+                            ref_struct+=k.find_element_by_xpath(".//content-viewer-pharos-link").get_attribute('href')+'\n'
+                        except:
+                            ref_struct+='no_crossref\n'   
+            #print('########### starting ##############')
+            #print(foot_struct)
+            #print('########### mid ################')
+            #print(ref_struct)
+            #print("########### fin ################")
+            print('references scraped')
+        except Exception as e: 
+            print(e)
+            print('no references in contents')
+            
+        # text processing for number of pages
+        time.sleep(3+random.random())
+        
+        driver.find_element_by_id(r"metadata-info-tab").click()
 
+        time.sleep(3+random.random())
+        
         #click download
         if not os.path.isfile(path):
             driver.find_element_by_xpath(r".//mfe-download-pharos-button[@data-sc='but click:pdf download']").click()
@@ -162,31 +198,35 @@ for ind in URL_starts.index:
                 print("no t&c")
 
         #need to allow time for download to complete and return to initial page
-        time.sleep(5+sleep_time*random.random())
+        time.sleep(10+sleep_time*random.random())
 
         #inserting this thing
     
         if (not datadump[['stable_url']].isin({'stable_url': [url]}).all(1).any())&(os.path.isfile(path)):
-            dict = {'stable_url': url, 'authors': author, 'content_type': content_type, 'reviewed_work': reviewed_work, 'title': title, 'abstract': abstract, 'src_info':src_info, 'affiliations':affiliations, 'issue_url':URL_starts['pivot_url'][ind], 'pages': pages,"no_pages": no_pages}
+            dict = {'stable_url': url, 'abstract': abstract, 'affiliations':affiliations,'raw':ref_raw,'footnotes':foot_struct,'references':ref_struct}
             datadump=datadump.append(dict, ignore_index=True)
+            datadump.to_excel(datadump_loc,index=False)  
         
         # try move to the next article, if it doesn't work, it dumps the data assuming the end of the issue has been reached
         try: 
             WebDriverWait(driver, 20).until(
-                expected_conditions.presence_of_element_located((By.ID, 'metadata-info-tab'))
+                expected_conditions.presence_of_element_located((By.XPATH, ".//content-viewer-pharos-link[@data-sc='text link:next item']"))
                 ) 
             driver.find_element_by_xpath(r".//content-viewer-pharos-link[@data-sc='text link:next item']").click()
+            #print('execute 3')
         except:
             try: 
                 WebDriverWait(driver, 20).until(
                 expected_conditions.presence_of_element_located((By.XPATH, r".//content-viewer-pharos-link[@data-sc='text link:previous item']"))
                 ) 
-                print("Has previous. No next. Seems to have reached end of issue")
-                datadump.to_excel(datadump_loc,index=False)     
+                print("Has previous. No next. Seems to have reached end of issue")   
                 x=1
+                #print('execute 4')
             except:
                 print("Stall, possible recaptcha, please resolve stall to "+url)
                 print("Enter to continue once page is resolved")
                 input()
         
         print(driver.current_url)
+        #print('execute 5')
+        #print(x)
