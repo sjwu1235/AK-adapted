@@ -1,0 +1,601 @@
+﻿{
+    "masterlist": [
+        {
+            "Journal Name ": "Econometrica, Econometric Society"
+        },
+        {
+            "Journal Name ": "American Economic Review, American Economic Association"
+        },
+        {
+            "Journal Name ": "The Quarterly Journal of Economics, Oxford University Press"
+        },
+        {
+            "Journal Name ": "Journal of Economic Literature, American Economic Association"
+        },
+        {
+            "Journal Name ": "Journal of Financial Economics, Elsevier"
+        },
+        {
+            "Journal Name ": "Journal of Political Economy, University of Chicago Press"
+        },
+        {
+            "Journal Name ": "Review of Financial Studies, Society for Financial Studies"
+        },
+        {
+            "Journal Name ": "Journal of Economic Growth, Springer"
+        },
+        {
+            "Journal Name ": "Journal of Economic Perspectives, American Economic Association"
+        },
+        {
+            "Journal Name ": "Review of Economic Studies, Oxford University Press"
+        },
+        {
+            "Journal Name ": "Journal of Finance, American Finance Association"
+        },
+        {
+            "Journal Name ": "Journal of Monetary Economics, Elsevier"
+        },
+        {
+            "Journal Name ": "The Review of Economics and Statistics, MIT Press"
+        },
+        {
+            "Journal Name ": "American Economic Journal: Macroeconomics, American Economic Association"
+        },
+        {
+            "Journal Name ": "American Economic Journal: Applied Economics, American Economic Association"
+        },
+        {
+            "Journal Name ": "Journal of Econometrics, Elsevier"
+        },
+        {
+            "Journal Name ": "Renewable and Sustainable Energy Reviews, Elsevier"
+        },
+        {
+            "Journal Name ": "Sustainability, MDPI, Open Access Journal"
+        },
+        {
+            "Journal Name ": "Journal of the European Economic Association, European Economic Association"
+        },
+        {
+            "Journal Name ": "Journal of Labor Economics, University of Chicago Press"
+        },
+        {
+            "Journal Name ": "Economic Journal, Royal Economic Society"
+        },
+        {
+            "Journal Name ": "Journal of International Economics, Elsevier"
+        },
+        {
+            "Journal Name ": "RAND Journal of Economics, RAND Corporation"
+        },
+        {
+            "Journal Name ": "Journal of Public Economics, Elsevier"
+        },
+        {
+            "Journal Name ": "Brookings Papers on Economic Activity, Economic Studies Program, The Brookings Institution"
+        },
+        {
+            "Journal Name ": "Journal of Development Economics, Elsevier"
+        },
+        {
+            "Journal Name ": "Journal of Applied Econometrics, John Wiley & Sons, Ltd."
+        },
+        {
+            "Journal Name ": "Proceedings, Federal Reserve Bank of San Francisco"
+        },
+        {
+            "Journal Name ": "Journal of Accounting and Economics, Elsevier"
+        },
+        {
+            "Journal Name ": "Journal of Banking & Finance, Elsevier"
+        },
+        {
+            "Journal Name ": "Energy Policy, Elsevier"
+        },
+        {
+            "Journal Name ": "Journal of Business & Economic Statistics, Taylor & Francis Journals"
+        },
+        {
+            "Journal Name ": "Management Science, INFORMS"
+        },
+        {
+            "Journal Name ": "American Economic Journal: Economic Policy, American Economic Association"
+        },
+        {
+            "Journal Name ": "European Economic Review, Elsevier"
+        },
+        {
+            "Journal Name ": "Annual Review of Economics, Annual Reviews"
+        },
+        {
+            "Journal Name ": "World Development, Elsevier"
+        },
+        {
+            "Journal Name ": "Journal of Business Research, Elsevier"
+        },
+        {
+            "Journal Name ": "Research Policy, Elsevier"
+        },
+        {
+            "Journal Name ": "Journal of Economic Theory, Elsevier"
+        },
+        {
+            "Journal Name ": "Experimental Economics, Springer; Economic Science Association"
+        },
+        {
+            "Journal Name ": "Journal of Financial Intermediation, Elsevier"
+        },
+        {
+            "Journal Name ": "Journal of Human Resources, University of Wisconsin Press"
+        },
+        {
+            "Journal Name ": "Journal of International Business Studies, Palgrave Macmillan; Academy of International Business"
+        },
+        {
+            "Journal Name ": "Energy, Elsevier"
+        },
+        {
+            "Journal Name ": "European Journal of Operational Research, Elsevier"
+        },
+        {
+            "Journal Name ": "Journal of Money, Credit and Banking, Blackwell Publishing"
+        },
+        {
+            "Journal Name ": "Energy Economics, Elsevier"
+        },
+        {
+            "Journal Name ": "Applied Energy, Elsevier"
+        },
+        {
+            "Journal Name ": "Journal of Business Venturing, Elsevier"
+        },
+        {
+            "Journal Name ": "Nature Materials"
+        },
+        {
+            "Journal Name ": "Nature Nanotechnology"
+        },
+        {
+            "Journal Name ": "Advanced Materials"
+        },
+        {
+            "Journal Name ": "Nature Electronics"
+        },
+        {
+            "Journal Name ": "Materials Science and Engineering: R: Reports"
+        },
+        {
+            "Journal Name ": "Materials Today"
+        },
+        {
+            "Journal Name ": "IEEE Communications Surveys and Tutorials"
+        },
+        {
+            "Journal Name ": "Nature Biomedical Engineering"
+        },
+        {
+            "Journal Name ": "Nano Energy"
+        },
+        {
+            "Journal Name ": "Science Robotics"
+        },
+        {
+            "Journal Name ": "Nano Today"
+        },
+        {
+            "Journal Name ": "ACS Nano"
+        },
+        {
+            "Journal Name ": "Advanced Science"
+        },
+        {
+            "Journal Name ": "Nano Letters"
+        },
+        {
+            "Journal Name ": "Cement and Concrete Research"
+        },
+        {
+            "Journal Name ": "Materials Horizons"
+        },
+        {
+            "Journal Name ": "Annual Review of Biomedical Engineering"
+        },
+        {
+            "Journal Name ": "npj 2D Materials and Applications"
+        },
+        {
+            "Journal Name ": "Journal of Engineering Education"
+        },
+        {
+            "Journal Name ": "npj Flexible Electronics"
+        },
+        {
+            "Journal Name ": "Small"
+        },
+        {
+            "Journal Name ": "International Materials Reviews"
+        },
+        {
+            "Journal Name ": "Research Policy"
+        },
+        {
+            "Journal Name ": "ACS Materials Letters"
+        },
+        {
+            "Journal Name ": "Journal of Operations Management"
+        },
+        {
+            "Journal Name ": "npj Computational Materials"
+        },
+        {
+            "Journal Name ": "Nano-Micro Letters"
+        },
+        {
+            "Journal Name ": "IEEE Transactions on Automatic Control"
+        },
+        {
+            "Journal Name ": "International Journal of Machine Tools and Manufacture"
+        },
+        {
+            "Journal Name ": "IEEE Transactions on Power Systems"
+        },
+        {
+            "Journal Name ": "Production and Operations Management"
+        },
+        {
+            "Journal Name ": "IEEE Wireless Communications"
+        },
+        {
+            "Journal Name ": "Biomaterials"
+        },
+        {
+            "Journal Name ": "Transportation Research Part C: Emerging Technologies"
+        },
+        {
+            "Journal Name ": "Transportation Research, Series B: Methodological"
+        },
+        {
+            "Journal Name ": "Automatica"
+        },
+        {
+            "Journal Name ": "IEEE Transactions on Cybernetics"
+        },
+        {
+            "Journal Name ": "Water Research"
+        },
+        {
+            "Journal Name ": "Applied Energy"
+        },
+        {
+            "Journal Name ": "IEEE Journal on Selected Areas in Communications"
+        },
+        {
+            "Journal Name ": "ISPRS Journal of Photogrammetry and Remote Sensing"
+        },
+        {
+            "Journal Name ": "Archive for Rational Mechanics and Analysis"
+        },
+        {
+            "Journal Name ": "Cement and Concrete Composites"
+        },
+        {
+            "Journal Name ": "IEEE Transactions on Fuzzy Systems"
+        },
+        {
+            "Journal Name ": "Current Opinion in Biotechnology"
+        },
+        {
+            "Journal Name ": "Protection and Control of Modern Power Systems"
+        },
+        {
+            "Journal Name ": "IEEE Communications Magazine"
+        },
+        {
+            "Journal Name ": "Computer-Aided Civil and Infrastructure Engineering"
+        },
+        {
+            "Journal Name ": "ACS Photonics"
+        },
+        {
+            "Journal Name ": "Nature"
+        },
+        {
+            "Journal Name ": "Science"
+        },
+        {
+            "Journal Name ": "New England Journal of Medicine"
+        },
+        {
+            "Journal Name ": "Cell"
+        },
+        {
+            "Journal Name ": "Proceedings of the National Academy of Sciences of the United States of America"
+        },
+        {
+            "Journal Name ": "Lancet "
+        },
+        {
+            "Journal Name ": "Chemical Reviews"
+        },
+        {
+            "Journal Name ": "JAMA - Journal of the American Medical Association"
+        },
+        {
+            "Journal Name ": "Physical Review Letters"
+        },
+        {
+            "Journal Name ": "Journal of the American Chemical Society"
+        },
+        {
+            "Journal Name ": "Circulation"
+        },
+        {
+            "Journal Name ": "Nature Genetics"
+        },
+        {
+            "Journal Name ": "Angewandte Chemie - International Edition"
+        },
+        {
+            "Journal Name ": "Journal of Clinical Oncology"
+        },
+        {
+            "Journal Name ": "Nature Medicine"
+        },
+        {
+            "Journal Name ": "Nucleic Acids Research"
+        },
+        {
+            "Journal Name ": "Advanced Materials"
+        },
+        {
+            "Journal Name ": "Chemical Society Reviews"
+        },
+        {
+            "Journal Name ": "Journal of Biological Chemistry"
+        },
+        {
+            "Journal Name ": "Astrophysical Journal"
+        },
+        {
+            "Journal Name ": "Journal of Clinical Investigation"
+        },
+        {
+            "Journal Name ": "Nano Letters"
+        },
+        {
+            "Journal Name ": "Nature Materials"
+        },
+        {
+            "Journal Name ": "Neuron"
+        },
+        {
+            "Journal Name ": "Blood"
+        },
+        {
+            "Journal Name ": "Physical Review B"
+        },
+        {
+            "Journal Name ": "Journal of Neuroscience"
+        },
+        {
+            "Journal Name ": "Cancer Research"
+        },
+        {
+            "Journal Name ": "Journal of Experimental Medicine"
+        },
+        {
+            "Journal Name ": "Nature Biotechnology"
+        },
+        {
+            "Journal Name ": "Applied Physics Letters"
+        },
+        {
+            "Journal Name ": "Nature Reviews Cancer"
+        },
+        {
+            "Journal Name ": "Genes and Development"
+        },
+        {
+            "Journal Name ": "Journal of the American College of Cardiology"
+        },
+        {
+            "Journal Name ": "Nature Reviews Molecular Cell Biology"
+        },
+        {
+            "Journal Name ": "The BMJ"
+        },
+        {
+            "Journal Name ": "Nature Neuroscience"
+        },
+        {
+            "Journal Name ": "Nature Reviews Neuroscience"
+        },
+        {
+            "Journal Name ": "Gastroenterology"
+        },
+        {
+            "Journal Name ": "Environmental Science & Technology"
+        },
+        {
+            "Journal Name ": "Physical Review D"
+        },
+        {
+            "Journal Name ": "Accounts of Chemical Research"
+        },
+        {
+            "Journal Name ": "Immunity"
+        },
+        {
+            "Journal Name ": "Molecular Cell"
+        },
+        {
+            "Journal Name ": "EMBO Journal"
+        },
+        {
+            "Journal Name ": "Journal of Physical Chemistry B"
+        },
+        {
+            "Journal Name ": "Annals of Internal Medicine"
+        },
+        {
+            "Journal Name ": "Bioinformatics"
+        },
+        {
+            "Journal Name ": "Nature Reviews Immunology"
+        },
+        {
+            "Journal Name ": "Nature Immunology"
+        },
+        {
+            "Journal Name ": "Science"
+        },
+        {
+            "Journal Name ": "Psychological Bulletin"
+        },
+        {
+            "Journal Name ": "Annals of the New York Academy of Sciences"
+        },
+        {
+            "Journal Name ": "Social Science and Medicine"
+        },
+        {
+            "Journal Name ": "Psychological Review"
+        },
+        {
+            "Journal Name ": "IEEE Signal Processing Magazine"
+        },
+        {
+            "Journal Name ": "Cognition"
+        },
+        {
+            "Journal Name ": "Journal of Business Ethics"
+        },
+        {
+            "Journal Name ": "Journal of the Acoustical Society of America"
+        },
+        {
+            "Journal Name ": "Quaternary Science Reviews"
+        },
+        {
+            "Journal Name ": "Administrative Science Quarterly"
+        },
+        {
+            "Journal Name ": "Journal of Consumer Research"
+        },
+        {
+            "Journal Name ": "Computers in Human Behavior"
+        },
+        {
+            "Journal Name ": "Neural Computation"
+        },
+        {
+            "Journal Name ": "Journal of Econometrics"
+        },
+        {
+            "Journal Name ": "Journal of Marriage and Family"
+        },
+        {
+            "Journal Name ": "Journal of Experimental Psychology: Learning Memory and Cognition"
+        },
+        {
+            "Journal Name ": "Artificial Intelligence"
+        },
+        {
+            "Journal Name ": "Decision Support Systems"
+        },
+        {
+            "Journal Name ": "Psychological Methods"
+        },
+        {
+            "Journal Name ": "Psychonomic Bulletin and Review"
+        },
+        {
+            "Journal Name ": "Journal of Experimental Psychology: Human Perception and Performance"
+        },
+        {
+            "Journal Name ": "Journal of Memory and Language"
+        },
+        {
+            "Journal Name ": "Journal of Speech, Language, and Hearing Research"
+        },
+        {
+            "Journal Name ": "Behavior Research Methods"
+        },
+        {
+            "Journal Name ": "Human Relations"
+        },
+        {
+            "Journal Name ": "Journal of Communication"
+        },
+        {
+            "Journal Name ": "Social Forces"
+        },
+        {
+            "Journal Name ": "Cognition and Emotion"
+        },
+        {
+            "Journal Name ": "Brain and Cognition"
+        },
+        {
+            "Journal Name ": "Journal of Archaeological Science"
+        },
+        {
+            "Journal Name ": "Memory and Cognition"
+        },
+        {
+            "Journal Name ": "Brain and Language"
+        },
+        {
+            "Journal Name ": "Journal of Clinical Psychology"
+        },
+        {
+            "Journal Name ": "Holocene"
+        },
+        {
+            "Journal Name ": "Attention, Perception, and Psychophysics"
+        },
+        {
+            "Journal Name ": "Science Education"
+        },
+        {
+            "Journal Name ": "Evolution and Human Behavior"
+        },
+        {
+            "Journal Name ": "Quaternary Research"
+        },
+        {
+            "Journal Name ": "Archives of Sexual Behavior"
+        },
+        {
+            "Journal Name ": "Current Anthropology"
+        },
+        {
+            "Journal Name ": "Consciousness and Cognition"
+        },
+        {
+            "Journal Name ": "Journal of Sex Research"
+        },
+        {
+            "Journal Name ": "Social Indicators Research"
+        },
+        {
+            "Journal Name ": "Speech Communication"
+        },
+        {
+            "Journal Name ": "Public Opinion Quarterly"
+        },
+        {
+            "Journal Name ": "Communication Research"
+        },
+        {
+            "Journal Name ": "Journal of Intellectual Disability Research"
+        },
+        {
+            "Journal Name ": "Gender and Society"
+        },
+        {
+            "Journal Name ": "Language Learning"
+        }
+    ]
+}
