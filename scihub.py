@@ -45,10 +45,10 @@ chrome_options.add_extension("./extension_busters.crx")
 chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 chrome_options.add_experimental_option("useAutomationExtension", False)
 chrome_options.add_experimental_option("prefs", {
-    "download.default_directory": directory, #Change default directory for downloads
+    "download.default_directory": "C:\\Users\\sjwu1\\Journal_Data\\Scihub", #Change default directory for downloads
     "download.prompt_for_download": False, #To auto download the file
     "download.directory_upgrade": True,
-    #"plugins.always_open_pdf_externally": True, #It will not show PDF directly in chrome
+    "plugins.always_open_pdf_externally": True, #It will not show PDF directly in chrome
     "credentials_enable_service": False, # gets rid of password saver popup
     "profile.password_manager_enabled": False #gets rid of password saver popup
 })
@@ -60,7 +60,7 @@ driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () =>
 time.sleep(5)
 '''
 # This section uses scopus DOIs which may be necessary for newer issues
-temp3=temp1[temp1['year']==1942]
+temp3=temp1[temp1['year']==input_deets['year']]
 print(temp3)
 for i in temp3.index:
     if '10.2307'in temp3['DOI'][i]:
