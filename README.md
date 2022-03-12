@@ -15,6 +15,7 @@ This is based off the original Aaron's Kit scraper program hosted at [https://gi
 <!-- TOC -->
 - [Assumptions](#assumptions)
 - [Quick start](#quick-start)
+- [Scihub](#scihub)
 - [Speed test](#speed-test)
 - [Run The Applications](#run-the-applications)
 - [Additional Docs](#additional-docs)
@@ -24,7 +25,7 @@ This is based off the original Aaron's Kit scraper program hosted at [https://gi
 * You have Visual Studio Code or Spyder IDE installed on your machine 
 * You have an excel reader installed on your machine
 * You know the basics of installing python programs and running code in an IDE
-* You have installed all the packages used in the alt_scraper.py and alt_scraper2.py file 
+* You have installed all the packages used in the Stage_1_scraper.py and Stage_2_scraper2.py file 
     * If not just type in ‘pip install packagename’ in the command terminal of your IDE
 
 ## Quick start
@@ -45,6 +46,17 @@ This is based off the original Aaron's Kit scraper program hosted at [https://gi
 6. Note: When editing inputs.json, replace all single "\" characters in file paths with "\\" eg: "C:\Users\xxxx\Journal_Data" to "C:\\Users\\xxxx\\Journal_Data"
 7. Run the scrapers. First Stage_1_scraper.py then Stage_2_scraper.py. See [Run The Applications](#run-the-applications) for details
 8. Alternatively, get an excel file of pivot URLs and just run Stage_2_scraper.py
+
+## Scihub
+An alternative script scihub.py scrapes articles from SciHub using the masterlist and pivot list generated from Stage_1_scraper.py. To run:
+
+1. Setup the Scihub_inputs.json file 
+{"directory": "..\\some path to folder for data\\Scihub",
+"master": "C:\\path to a master list\\journal_master.xlsx", 
+"pivots": "C:\\path to pivot\\journal_name_pivots.xlsx",
+"year": the year that you want to scrape eg: 1950, 
+"sleep_time": 20}
+2. Run 'python scihub.py'
 
 ## Speed test
 ### Option 1
