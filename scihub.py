@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
 import os
 import wget
-
+import shutil
 
 
 with open(r'Scihub_inputs.json', 'r') as input_file:
@@ -40,8 +40,8 @@ chrome_options = webdriver.ChromeOptions()
 
 chrome_options.add_argument(f"user-agent={USER_AGENT}")
 chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-chrome_options.add_extension("./extension_1_38_6_0.crx")
-chrome_options.add_extension("./extension_busters.crx")
+
+
 chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 chrome_options.add_experimental_option("useAutomationExtension", False)
 chrome_options.add_experimental_option("prefs", {
@@ -80,16 +80,59 @@ for i in temp3.index:
         print("DOI not in sync with JSTOR: "+temp3['DOI'][i])
 '''
 
+mirrors=["//zero.sci-hub.se","//moscow.sci-hub.se","//twin.sci-hub.se"]
+def get_file(url, name):
+    try:
+        wget.download(url, name)
+        return 1
+    except:
+        return 0
+
+def download_wait(path_to_downloads):
+    waits = 0
+    dl_wait = True
+    while dl_wait and waits < 3:
+        time.sleep(20)
+        dl_wait = False
+        for fname in os.listdir(path_to_downloads):
+            if fname.endswith('.crdownload') or fname.endswith('.tmp'):
+                print(fname)
+                dl_wait = True
+        waits += 1
+    return waits
+
 for i in processed_list:
     if(i[8:]+'.pdf' in os.listdir(directory)):
         continue
     driver.get("https://sci-hub.se/"+i)
-    time.sleep(15)
+    time.sleep(20)
     try:
-        print(driver.find_element_by_xpath(r".//div[@id='buttons']//button").get_attribute('onclick')[15:-1])
-        wget.download('https:'+driver.find_element_by_xpath(r".//div[@id='buttons']//button").get_attribute('onclick')[15:-1],directory+'\\'+i[8:]+'.pdf')
-        time.sleep(10)
-        print(i)
-    except:
-        print('not loading, document not likely on SciHub')
+        temp=driver.find_element_by_xpath(r".//div[@id='buttons']//button").get_attribute('onclick')[15:-1]
+        print(temp)
+        '''
+        if 'moscow' in temp:
+            print(temp)
+            temp=mirrors[0]+temp[19:]
+            print(temp)
+        '''
+        wget.download('https:'+temp, directory+'\\'+i[8:]+'.pdf')
         time.sleep(15)
+        print(i)
+    except Exception as e:
+        print(e)
+        print('not loading, document not likely on SciHub')
+        before=len(os.listdir(directory))
+        try:
+            driver.find_element_by_xpath(r".//div[@id='buttons']//button").click()
+            time.sleep(60) # give it 60 seconds to download
+            after=len(os.listdir(directory))
+            if(after-before!=1):
+                raise 'no no no nothing'
+            print(os.path.join(directory+'\\',filename))
+            filename = max([f for f in os.listdir(directory)], key=os.path.getctime)
+            shutil.move(os.path.join(directory+'\\',filename), directory+'\\'+i[8:]+'.pdf')
+        except Exception as a:
+            print(a)
+            print("nope they really don't have one.")
+            time.sleep(15)
+        
