@@ -140,5 +140,10 @@ cookiefile.txt
 uctpw.json
 !spec/*.json
 
+# files to ignore
+inputs.json
+Scihub_inputs.json
+datadump.xlsx
+
 # Exclude BrowserProfile
 BrowserProfile/
