@@ -142,6 +142,7 @@ uctpw.json
 token.json
 token2.json
 oauth_token.json
+credentials.json
 
 # Exclude BrowserProfile
 BrowserProfile/
