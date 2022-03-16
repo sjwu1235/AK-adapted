@@ -139,6 +139,9 @@ yarn-error.log
 cookiefile.txt
 uctpw.json
 !spec/*.json
+token.json
+token2.json
+oauth_token.json
 
 # Exclude BrowserProfile
 BrowserProfile/
