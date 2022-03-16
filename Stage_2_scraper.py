@@ -3,14 +3,15 @@ from pathlib import Path
 import time
 import pandas as pd
 import os.path
-
+import random
+import re
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
 
-from connection_controllers.uct_connection_controller import UctConnectionController
+from connection_controllers.gen_connection_controller import GenConnectionController
 
 with open(r'inputs.json', 'r') as input_file:
 
@@ -35,7 +36,8 @@ curdir = Path.cwd().joinpath("BrowserProfile")
 
 chrome_options.add_argument(f"user-agent={USER_AGENT}")
 chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-chrome_options.add_extension("./extension_1_38_6_0.crx")
+#chrome_options.add_extension("./extension_1_38_6_0.crx")
+#chrome_options.add_extension("./extension_busters.crx")
 chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 chrome_options.add_experimental_option("useAutomationExtension", False)
 chrome_options.add_experimental_option("prefs", {
@@ -51,26 +53,21 @@ driver = webdriver.Chrome(ChromeDriverManager().install(), options = chrome_opti
 
 driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
-with open(r'uctpw.json', 'r') as logon_file:
-
-    logon_deets = json.load(logon_file)
-
-web_session = UctConnectionController(driver, 
-                                      "https://www.jstor.org",
-                                      logon_deets['user'],
-                                      logon_deets['pass'])
-
+web_session = GenConnectionController(driver, "https://www.jstor.org")
+lib_URL=re.search('https://(.+?)/', driver.current_url).group(1)
 starts = pd.read_excel(start_loc)
 URL_starts = starts[(starts['year']>=start_year)&(starts['year']<=end_year)]
-
+throttle=0
+random.seed(time.time())
 for ind in URL_starts.index:
     print("New Issue "+ URL_starts['Jstor_issue_text'][ind])
     # point it at some Jstor start page
-    driver.get(URL_starts['pivot_url'][ind])
-    
+    driver.get(re.sub('https://(.+?)/', 'https://'+lib_URL+'/', URL_starts['pivot_url'][ind]))
+    time.sleep(5+sleep_time*random.random())    
     x=0
     while x==0:
         try:
+            print('execute 1')
             WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "metadata-info-tab")))
         except:
             print("Article page not loading")
@@ -84,9 +81,11 @@ for ind in URL_starts.index:
         #check if it's been downloaded already
         if (datadump[['stable_url']].isin({'stable_url': [url]}).all(1).any())&(os.path.isfile(path)):
             try: 
+                print('execute 2')
                 WebDriverWait(driver, 20).until(
                     expected_conditions.presence_of_element_located((By.ID, 'metadata-info-tab'))
                     ) 
+                time.sleep(3)
                 driver.find_element_by_xpath(r".//content-viewer-pharos-link[@data-sc='text link:next item']").click()
             except:
                 print("was not able to go to next item")
@@ -94,7 +93,6 @@ for ind in URL_starts.index:
                 x=1
                 datadump.to_excel(datadump_loc,index=False)  
             continue
-
         # edge case: some do have author affiliation and some do not
         affiliations=""
         if (input_deets['affiliations']==1):
@@ -179,11 +177,11 @@ for ind in URL_starts.index:
             print('no references in contents')
             
         # text processing for number of pages
-        time.sleep(3)
+        time.sleep(3+random.random())
         
         driver.find_element_by_id(r"metadata-info-tab").click()
 
-        time.sleep(3)
+        time.sleep(3+random.random())
         
         #click download
         if not os.path.isfile(path):
@@ -198,23 +196,23 @@ for ind in URL_starts.index:
             except:
                 print("no t&c")
 
-            #need to allow time for download to complete and return to initial page
-        
-        time.sleep(sleep_time)
+        #need to allow time for download to complete and return to initial page
+        time.sleep(10+sleep_time*random.random())
 
         #inserting this thing
     
         if (not datadump[['stable_url']].isin({'stable_url': [url]}).all(1).any())&(os.path.isfile(path)):
             dict = {'stable_url': url, 'abstract': abstract, 'affiliations':affiliations,'raw':ref_raw,'footnotes':foot_struct,'references':ref_struct}
             datadump=datadump.append(dict, ignore_index=True)
-            datadump.to_excel(datadump_loc,index=False) 
+            datadump.to_excel(datadump_loc,index=False)  
         
         # try move to the next article, if it doesn't work, it dumps the data assuming the end of the issue has been reached
         try: 
             WebDriverWait(driver, 20).until(
-                expected_conditions.presence_of_element_located((By.ID, 'metadata-info-tab'))
+                expected_conditions.presence_of_element_located((By.XPATH, ".//content-viewer-pharos-link[@data-sc='text link:next item']"))
                 ) 
             driver.find_element_by_xpath(r".//content-viewer-pharos-link[@data-sc='text link:next item']").click()
+            #print('execute 3')
         except:
             try: 
                 WebDriverWait(driver, 20).until(
@@ -222,9 +220,12 @@ for ind in URL_starts.index:
                 ) 
                 print("Was not able to go to next item. Seems to have reached end of issue")    
                 x=1
+                #print('execute 4')
             except:
                 print("Stall, possible recaptcha, please resolve stall to "+url)
                 print("Enter to continue once page is resolved")
                 input()
-
+                        
         print(driver.current_url)
+        #print('execute 5')
+        #print(x)
