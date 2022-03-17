@@ -45,7 +45,7 @@ chrome_options.add_argument("--disable-blink-features=AutomationControlled")
 chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 chrome_options.add_experimental_option("useAutomationExtension", False)
 chrome_options.add_experimental_option("prefs", {
-    "download.default_directory": "C:\\Users\\sjwu1\\Journal_Data\\Scihub", #Change default directory for downloads
+    "download.default_directory": directory, #Change default directory for downloads
     "download.prompt_for_download": False, #To auto download the file
     "download.directory_upgrade": True,
     "plugins.always_open_pdf_externally": True, #It will not show PDF directly in chrome
