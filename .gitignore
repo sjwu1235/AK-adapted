@@ -146,3 +146,6 @@ credentials.json
 
 # Exclude BrowserProfile
 BrowserProfile/
+
+# ease of adjustments
+inputs.json
