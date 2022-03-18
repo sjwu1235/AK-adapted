@@ -10,6 +10,8 @@ from googleapiclient.http import MediaFileUpload
 
 '''
 Notes and references:
+This file is necessary for reference as the python notes on drive api are outdates for python. Eg: print statement is incorrect.
+
 1. acknowl: answer for using service account. https://stackoverflow.com/questions/64570647/google-drive-api-python-service-account-example
 2. quickstart ref that follows on from answer in 1: https://developers.google.com/drive/api/v3/quickstart/python
 3. scopes: https://developers.google.com/identity/protocols/oauth2/scopes
@@ -24,15 +26,15 @@ Todo:
 
 import os.path
 
-SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
+SCOPES = ['https://www.googleapis.com/auth/drive.readonly','https://www.googleapis.com/auth/drive.file']
 KEY_FILE_LOCATION = 'credentials.json'
 
 
 def initialize_drive():
-    """Initializes an service object.
+    """Initializes an service object. Does some arbitrary checks
 
     Returns:
-        An authorized service object.
+        An authorized service object. Or not. Depends on the mood.
     """
     creds = ServiceAccountCredentials.from_json_keyfile_name(
         KEY_FILE_LOCATION, SCOPES)
