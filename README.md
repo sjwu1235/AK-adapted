@@ -39,6 +39,7 @@ This is based off the original Aaron's Kit scraper program hosted at [https://gi
  "directory":"folder path to pdf data eg: C:\\Users\\xxxx\\Journal_Data", 
  "datadump":"path to datadump.xlsx eg: C:\\Users\\xxxx\\Journal_Data\\datadump.xlsx", 
  "pivots":"path to pivots file you can name it anything each session eg: C:\\Users\\xxxx\\Journal_Data\\pivots.xlsx",
+ "master":"path to masterlist file C:\\Users\\xxxx\\Journal_Data\\Masterlist.xlsx",
  "start_year": year to start scraping eg: 2000, 
  "end_year": year to stop scraping (inclusive) eg: 2020, 
  "sleep_time": time taken to download pdf in speed test. Suggest 20 or longer
