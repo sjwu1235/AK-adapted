@@ -22,6 +22,7 @@ To read:
 
 Todo:
 1. Research how to restrict access of service accounts to readonly and post only, no modify or delete.
+2. Research why some folders with viewer access allow uploads (FR drive) and owner drive does not for viewer only folders.
 '''
 
 import os.path
