@@ -1,3 +1,4 @@
+from ast import Not
 import json
 from pathlib import Path
 import time
@@ -20,12 +21,16 @@ with open(r'inputs.json', 'r') as input_file:
 directory = input_deets['directory']
 datadump_loc = input_deets['datadump']
 datadump=pd.read_excel(datadump_loc)
+masterlist = pd.read_excel(input_deets['master'])
 start_loc = input_deets['pivots']
 start_year=input_deets['start_year']
 end_year=input_deets['end_year']
 sleep_time=input_deets['sleep_time']
+starts = pd.read_excel(start_loc)
+URL_starts = starts[(starts['year']>=start_year)&(starts['year']<=end_year)]
 
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36'
+
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36'
 chrome_options = webdriver.ChromeOptions()
 
 # don't recommend this because this scraper may require some human intervention if it crashes but...
@@ -33,11 +38,11 @@ chrome_options = webdriver.ChromeOptions()
 #chrome_options.add_argument('--headless')
 
 curdir = Path.cwd().joinpath("BrowserProfile")
-
+#chrome_options.add_argument("user-data-dir=selenium") #this is supposed to automatically manage cookies but it's not working
 chrome_options.add_argument(f"user-agent={USER_AGENT}")
 chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-#chrome_options.add_extension("./extension_1_38_6_0.crx")
-#chrome_options.add_extension("./extension_busters.crx")
+chrome_options.add_extension("./extension_1_38_6_0.crx")
+chrome_options.add_extension("./extension_busters.crx")
 chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 chrome_options.add_experimental_option("useAutomationExtension", False)
 chrome_options.add_experimental_option("prefs", {
@@ -55,17 +60,46 @@ driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () =>
 
 web_session = GenConnectionController(driver, "https://www.jstor.org")
 lib_URL=re.search('https://(.+?)/', driver.current_url).group(1)
-starts = pd.read_excel(start_loc)
-URL_starts = starts[(starts['year']>=start_year)&(starts['year']<=end_year)]
+
+
 throttle=0
 random.seed(time.time())
 for ind in URL_starts.index:
     print("New Issue "+ URL_starts['Jstor_issue_text'][ind])
-    # point it at some Jstor start page
-    driver.get(re.sub('https://(.+?)/', 'https://'+lib_URL+'/', URL_starts['pivot_url'][ind]))
-    time.sleep(5+sleep_time*random.random())    
+
+    # finding a suitable pivot point to reduce travel
+    issue_masters=masterlist[masterlist['issue_url']==URL_starts['issue_url'][ind]]
+    downloaded=0
+    
+    for a in issue_masters.index:
+        path = directory+"\\"+issue_masters['stable_url'][a].split("/")[-1]+".pdf"
+        print(not datadump[['stable_url']].isin({'stable_url': [issue_masters['stable_url'][a]]}).all(1).any())
+        print(not os.path.isfile(path))
+        print(issue_masters['stable_url'][a])
+        if (not datadump[['stable_url']].isin({'stable_url': [issue_masters['stable_url'][a]]}).all(1).any()) or (not os.path.isfile(path)):
+            # point it at the first URL that hasn't been scraped for references or the pdf
+            driver.get(re.sub('https://(.+?)/', 'https://'+lib_URL+'/', issue_masters['stable_url'][a]))
+            print('starting from: '+issue_masters['stable_url'][a])
+            print(str(downloaded) + ' complete references and pdfs downloaded')
+            break
+        downloaded+=1
+    
+    time.sleep(5+sleep_time*random.random())
+    if (downloaded==URL_starts['no_docs'][ind]):
+        continue    
     x=0
     while x==0:
+        '''
+        # code for accepting cookies
+        try:
+            WebDriverWait(driver, 10).until(
+                expected_conditions.element_to_be_clickable((By.XPATH, r"//button[@id='onetrust-accept-btn-handler']"))
+            )
+            driver.find_element_by_xpath(r".//button[@id='onetrust-accept-btn-handler']").click()
+            print('cookies accepted')
+        except:
+            print("Please accept cookies else continue if there aren't any")
+        '''
         try:
             print('execute 1')
             WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "metadata-info-tab")))
@@ -79,14 +113,14 @@ for ind in URL_starts.index:
         url=driver.find_element_by_xpath(r".//div[@class='stable-url']").text
         path = directory+"\\"+url.split("/")[-1]+".pdf"
         
-        #check if it's been downloaded already
-        if (datadump[['stable_url']].isin({'stable_url': [url]}).all(1).any())&(os.path.isfile(path)):
+        #check if the record is complete ie: scraped references and pdfs
+        if (datadump[['stable_url']].isin({'stable_url': [url]}).all(1).any()) and (os.path.isfile(path)):
             try: 
                 print('execute 2')
                 WebDriverWait(driver, 20).until(
                     expected_conditions.presence_of_element_located((By.ID, 'metadata-info-tab'))
                     ) 
-                time.sleep(3)
+                time.sleep(10)
                 driver.find_element_by_xpath(r".//content-viewer-pharos-link[@data-sc='text link:next item']").click()
             except:
                 print("was not able to go to next item")
@@ -184,7 +218,7 @@ for ind in URL_starts.index:
 
         time.sleep(3+random.random())
         
-        #click download
+        #click download but only if not there already
         if not os.path.isfile(path):
             driver.find_element_by_xpath(r".//mfe-download-pharos-button[@data-sc='but click:pdf download']").click()
         
