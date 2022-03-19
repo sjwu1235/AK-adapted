@@ -61,14 +61,25 @@ def initialize_drive():
             page_token = response.get('nextPageToken', None)
             if page_token is None:
                 break
-        print(count)
+        print(str(count)+ ' files/folders found')
+        
 
-        file_metadata = {'name': '1881665.pdf'}
-        media = MediaFileUpload('1881665.pdf', mimetype='application/pdf')
+        # Uploading a file
+
+        # this is the folder id for the destination folder on google drive
+        # it is set manually to a folder called Crowd Sourcing
+        folder_id = "1UCcp9d5zuXami-LGi7v5H8v7DJGI8xZA"
+        
+        file_metadata = {
+            "name": "1881665.pdf",
+            "parents": [folder_id]
+            }
+        # first argument is path to pdf on local
+        media = MediaFileUpload("1881665.pdf", mimetype="application/pdf")
         file = service.files().create(body=file_metadata,
                                             media_body=media,
-                                            fields='id').execute()
-        print ('File ID: '+ file.get('id'))
+                                            fields="id").execute()
+        print("File ID: "+ file.get("id"))    
     except HttpError as error:
         # TODO(developer) - Handle errors from drive API.
         print(f'An error occurred: {error}')
