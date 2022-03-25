@@ -148,6 +148,7 @@ credentials.json
 inputs.json
 Scihub_inputs.json
 datadump.xlsx
+misc/
 
 # Exclude BrowserProfile
 BrowserProfile/

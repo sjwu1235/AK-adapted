@@ -62,13 +62,15 @@ def initialize_drive():
             if page_token is None:
                 break
         print(count)
-
-        file_metadata = {'name': '1881665.pdf'}
-        media = MediaFileUpload('1881665.pdf', mimetype='application/pdf')
+        #folderId= ID_string_for_parent_folder_if_uploading_to_specific_folder
+        file_metadata = {'name': '1881665.pdf'
+                        #, 'parents':[folderId]    
+                        }
+        media = MediaFileUpload('1881665.pdf', mimetype='application/pdf', resumable=True)
         file = service.files().create(body=file_metadata,
                                             media_body=media,
                                             fields='id').execute()
-        print ('File ID: '+ file.get('id'))
+        print ('File ID: '+ file.get('id'))        
     except HttpError as error:
         # TODO(developer) - Handle errors from drive API.
         print(f'An error occurred: {error}')

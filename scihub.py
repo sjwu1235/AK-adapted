@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 import os
 import wget
 import shutil
-
+import re
 
 with open(r'Scihub_inputs.json', 'r') as input_file:
     input_deets = json.load(input_file)
@@ -88,18 +88,6 @@ def get_file(url, name):
     except:
         return 0
 
-def download_wait(path_to_downloads):
-    waits = 0
-    dl_wait = True
-    while dl_wait and waits < 3:
-        time.sleep(20)
-        dl_wait = False
-        for fname in os.listdir(path_to_downloads):
-            if fname.endswith('.crdownload') or fname.endswith('.tmp'):
-                print(fname)
-                dl_wait = True
-        waits += 1
-    return waits
 
 for i in processed_list:
     if(i[8:]+'.pdf' in os.listdir(directory)):
@@ -121,16 +109,21 @@ for i in processed_list:
     except Exception as e:
         print(e)
         print('not loading, document not likely on SciHub')
-        before=len(os.listdir(directory))
         try:
+            print('trying an alternative method...')
+            temp=driver.find_element_by_xpath(r".//div[@id='buttons']//button").get_attribute('onclick')[15:-1]
             driver.find_element_by_xpath(r".//div[@id='buttons']//button").click()
             time.sleep(60) # give it 60 seconds to download
-            after=len(os.listdir(directory))
-            if(after-before!=1):
-                raise 'no no no nothing'
-            print(os.path.join(directory+'\\',filename))
-            filename = max([f for f in os.listdir(directory)], key=os.path.getctime)
-            shutil.move(os.path.join(directory+'\\',filename), directory+'\\'+i[8:]+'.pdf')
+            
+            filename = re.search('(.+?)/(.+?)/(.+?)/(.+?)/(.+?)\?download=true', temp).group(5)
+            checkfile=directory+'\\'+filename
+            print(checkfile)
+            if(filename in os.listdir(directory)):
+                os.rename(checkfile, directory+'\\'+i[8:]+'.pdf')
+                print('successfully renamed the file!')
+            else:
+                print('suspected file named '+filename+' that should be named '+i[8:]+'.pdf')
+                print('otherwise, check your internet connection... this file just didn\'t download')
         except Exception as a:
             print(a)
             print("nope they really don't have one.")

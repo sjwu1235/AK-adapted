@@ -6,12 +6,12 @@ import os.path
 import shutil
 import os
 
-directory = "C:\\Users\\sjwu1\\Journal_Data\\Scihub"
+directory = "C:\\Users\\sjwu1\\Journal_Data\\test"
 temp = pd.read_excel("C:\\Users\\sjwu1\\Journal_Data\\Master lists\\AER_master.xlsx")
 temp2 = pd.read_excel("C:\\Users\\sjwu1\\Journal_Data\\pivots\\AER_pivots.xlsx")
 
-#src_folder = r"C:\Users\sjwu1\Journal_Data"
-#dst_folder = r"C:\Users\sjwu1\Master_\AER_data"
+#src_folder = r"C:\Users\sjwu1\Journal_Data\\Scihub"
+#dst_folder = r"C:\Users\sjwu1\Journal_Data\\Scihub_checked"
 
 total=0
 fulllist_s_1940=0
