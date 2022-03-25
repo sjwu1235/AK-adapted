@@ -22,6 +22,7 @@ To read:
 
 Todo:
 1. Research how to restrict access of service accounts to readonly and post only, no modify or delete.
+2. Research why some folders with viewer access allow uploads (FR drive) and owner drive does not for viewer only folders.
 '''
 
 import os.path
@@ -61,16 +62,25 @@ def initialize_drive():
             page_token = response.get('nextPageToken', None)
             if page_token is None:
                 break
-        print(count)
-        #folderId= ID_string_for_parent_folder_if_uploading_to_specific_folder
-        file_metadata = {'name': '1881665.pdf'
-                        #, 'parents':[folderId]    
-                        }
-        media = MediaFileUpload('1881665.pdf', mimetype='application/pdf', resumable=True)
+        print(str(count)+ ' files/folders found')
+        
+
+        # Uploading a file
+
+        # this is the folder id for the destination folder on google drive
+        # it is set manually to a folder called Crowd Sourcing
+        folder_id = "1UCcp9d5zuXami-LGi7v5H8v7DJGI8xZA"
+        
+        file_metadata = {
+            "name": "1881665.pdf",
+            "parents": [folder_id]
+            }
+        # first argument is path to pdf on local
+        media = MediaFileUpload("1881665.pdf", mimetype="application/pdf")
         file = service.files().create(body=file_metadata,
                                             media_body=media,
-                                            fields='id').execute()
-        print ('File ID: '+ file.get('id'))        
+                                            fields="id").execute()
+        print("File ID: "+ file.get("id"))    
     except HttpError as error:
         # TODO(developer) - Handle errors from drive API.
         print(f'An error occurred: {error}')
