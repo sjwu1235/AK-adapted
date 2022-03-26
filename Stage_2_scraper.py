@@ -1,3 +1,4 @@
+from __future__ import print_function
 from ast import Not
 import json
 from pathlib import Path
@@ -11,6 +12,27 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
+
+from oauth2client.service_account import ServiceAccountCredentials
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+from googleapiclient.http import MediaFileUpload
+
+SCOPES = ['https://www.googleapis.com/auth/drive.readonly','https://www.googleapis.com/auth/drive.file']
+KEY_FILE_LOCATION = 'credentials.json'
+
+# this is the folder id for the destination folder on google drive
+# # it is set manually to a folder called Crowd Sourcing
+               
+               
+folder_id = "1DJ0Ph_-JWSvkzzI70EVCU9JRb1jMp_cO"
+creds = ServiceAccountCredentials.from_json_keyfile_name(
+        KEY_FILE_LOCATION, SCOPES)
+service = build('drive', 'v3', credentials=creds)
+count=0
 
 from connection_controllers.gen_connection_controller import GenConnectionController
 
@@ -35,7 +57,7 @@ chrome_options = webdriver.ChromeOptions()
 
 # don't recommend this because this scraper may require some human intervention if it crashes but...
 # uncomment below if you dont want the google chrome browser UI to show up.
-#chrome_options.add_argument('--headless')
+# chrome_options.add_argument('--headless')
 
 curdir = Path.cwd().joinpath("BrowserProfile")
 #chrome_options.add_argument("user-data-dir=selenium") #this is supposed to automatically manage cookies but it's not working
@@ -61,6 +83,30 @@ driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () =>
 web_session = GenConnectionController(driver, "https://www.jstor.org")
 lib_URL=re.search('https://(.+?)/', driver.current_url).group(1)
 
+def isUpload(file_name):
+    try:
+        upload_indicator=True #false for in drive so don't upload and true not in drive so upload required
+        page_token = None
+        while True:
+            # Call the Drive v3 API
+            # "mimeType = 'application/vnd.google-apps.folder'" # files that are folders
+            # "name ='354.pdf'" #search by name
+            response = service.files().list(q="name ='"+file_name+"'",
+                fields="nextPageToken, files(id)",
+                pageToken=page_token).execute()
+            items = response.get('files', [])                
+            if (len(items)>0):
+                print(u'{0}'.format(items[0]['id']))
+                upload_indicator=False
+            page_token = response.get('nextPageToken', None)
+            if page_token is None:
+                break
+            print(count)
+        return upload_indicator
+    except HttpError as error:
+        # TODO(developer) - Handle errors from drive API.
+        print(f'An error occurred: {error}')
+        return None
 
 throttle=0
 random.seed(time.time())
@@ -76,7 +122,11 @@ for ind in URL_starts.index:
         print(not datadump[['stable_url']].isin({'stable_url': [issue_masters['stable_url'][a]]}).all(1).any())
         print(not os.path.isfile(path))
         print(issue_masters['stable_url'][a])
-        if (not datadump[['stable_url']].isin({'stable_url': [issue_masters['stable_url'][a]]}).all(1).any()) or (not os.path.isfile(path)):
+        check=isUpload(issue_masters['stable_url'][a].split("/")[-1]+".pdf")
+        dataCheck=isUpload(issue_masters['stable_url'][a].split("/")[-1]+".json")
+        print(check)
+        print(dataCheck)
+        if (dataCheck or check):
             # point it at the first URL that hasn't been scraped for references or the pdf
             driver.get(re.sub('https://(.+?)/', 'https://'+lib_URL+'/', issue_masters['stable_url'][a]))
             print('starting from: '+issue_masters['stable_url'][a])
@@ -113,7 +163,13 @@ for ind in URL_starts.index:
         path = directory+"\\"+url.split("/")[-1]+".pdf"
         
         #check if the record is complete ie: scraped references and pdfs
-        if (datadump[['stable_url']].isin({'stable_url': [url]}).all(1).any()) and (os.path.isfile(path)):
+        check=isUpload(url.split("/")[-1]+".pdf")
+        dataCheck=isUpload(url.split("/")[-1]+".json")
+        print(check)
+        print(dataCheck)
+        #check and datacheck evaluate to true if ether the pdf or metadata require uploading
+        #hence pdf and json must evaluate to false to result in a skip
+        if ((not dataCheck) and (not check)):
             try: 
                 print('execute 2')
                 WebDriverWait(driver, 20).until(
@@ -218,7 +274,7 @@ for ind in URL_starts.index:
         time.sleep(3+random.random())
         
         #click download but only if not there already
-        if not os.path.isfile(path):
+        if (check):
             driver.find_element_by_xpath(r".//mfe-download-pharos-button[@data-sc='but click:pdf download']").click()
         
             # bypass t&c
@@ -232,13 +288,45 @@ for ind in URL_starts.index:
 
         #need to allow time for download to complete and return to initial page
         time.sleep(10+sleep_time*random.random())
+        if (check&os.path.isfile(path)):
+            try:
+                # Uploading a file
+                file_metadata = {
+                    "name": url.split("/")[-1]+".pdf",
+                    "parents": [folder_id]
+                    }
+                # first argument is path to pdf on local
+                media = MediaFileUpload(path, mimetype="application/pdf")
+                file = service.files().create(body=file_metadata,
+                                                    media_body=media,
+                                                    fields="id").execute()
+                print("File ID: "+ file.get("id")) 
+            except HttpError as error:
+                # TODO(developer) - Handle errors from drive API.
+                print(f'An error occurred: {error}')
 
         #inserting this thing
-    
-        if (not datadump[['stable_url']].isin({'stable_url': [url]}).all(1).any())&(os.path.isfile(path)):
+        #if json not online and file has been downloaded
+        if (dataCheck & os.path.isfile(path)):
             dict = {'stable_url': url, 'abstract': abstract, 'affiliations':affiliations,'raw':ref_raw,'footnotes':foot_struct,'references':ref_struct}
-            datadump=datadump.append(dict, ignore_index=True)
-            datadump.to_excel(datadump_loc,index=False)  
+            with open(directory+"\\"+url.split("/")[-1]+".json", "w") as outfile:
+                json.dump(dict, outfile)  
+            try:
+                # Uploading a file
+                file_metadata = {
+                    "name": url.split("/")[-1]+".json",
+                    "parents": [folder_id]
+                    }
+                # first argument is path to pdf on local
+                media = MediaFileUpload(directory+"\\"+url.split("/")[-1]+".json", mimetype="application/json")
+                file = service.files().create(body=file_metadata,
+                                                    media_body=media,
+                                                    fields="id").execute()
+                print("File ID: "+ file.get("id")) 
+            except HttpError as error:
+                # TODO(developer) - Handle errors from drive API.
+                print(f'An error occurred: {error}')
+
         
         # try move to the next article, if it doesn't work, it dumps the data assuming the end of the issue has been reached
         try: 

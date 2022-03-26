@@ -23,6 +23,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_name(
         KEY_FILE_LOCATION, SCOPES)
 service = build('drive', 'v3', credentials=creds)
 count=0
+
 directory = "C:\\Users\\sjwu1\\Journal_Data\\test"
 temp = pd.read_excel("C:\\Users\\sjwu1\\Journal_Data\\Master lists\\AER_master.xlsx")
 temp2 = pd.read_excel("C:\\Users\\sjwu1\\Journal_Data\\pivots\\AER_pivots.xlsx")
@@ -38,10 +39,10 @@ for ind in temp2.index:
     uploaded = 0
     for ind2 in temp3.index:
         pdf_file_name=temp['stable_url'][ind2].split('/')[-1]+".pdf"
-        if (temp2['year'][ind]>=1940):
+        if (temp2['year'][ind]==1984):
             fulllist_s_1940+=1
             #print(pdf_file_name+" "+str(os.path.isfile(directory+pdf_file_name)))
-            upload_indicator=0 #defaults to not upload
+            upload_indicator=1 #defaults to upload - we can handle duplicates
             try:
                 page_token = None
                 while True:
@@ -49,14 +50,14 @@ for ind in temp2.index:
                     # "mimeType = 'application/vnd.google-apps.folder'" # files that are folders
                     # "name ='354.pdf'" #search by name
                     response = service.files().list(q="name ='"+pdf_file_name+"'",
-                        fields="nextPageToken, files(id)",
+                        fields="nextPageToken, files(id,name)",
                         pageToken=page_token).execute()
                     items = response.get('files', [])                
                     if (len(items)>0):
                         uploaded+=1
+                        service.files().delete(fileId=items[0]['id']).execute()
+                        print(u'{0} ({1})'.format(items[0]['name'], items[0]['id']))
                         upload_indicator=0
-                    else:
-                        upload_indicator=1
                     page_token = response.get('nextPageToken', None)
                     if page_token is None:
                         break
@@ -84,4 +85,4 @@ for ind in temp2.index:
     print(str(temp2['year'][ind])+" "+str(temp2['no_docs'][ind])+" "+str(temp2['issue_url'][ind])+" "+str(downloaded)+ " "+str(uploaded))
 
 print('total downloaded: ' + str(total))
-print('total papers after 1940:'+str(fulllist_s_1940))
+print('total papers after 1940: '+str(fulllist_s_1940))

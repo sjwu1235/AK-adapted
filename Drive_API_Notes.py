@@ -7,6 +7,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
+import time
 
 '''
 Notes and references:
@@ -58,6 +59,7 @@ def initialize_drive():
             
             for item in items:
                 print(u'{0} ({1})'.format(item['name'], item['id']))
+                
                 count+=1
             page_token = response.get('nextPageToken', None)
             if page_token is None:
@@ -80,7 +82,12 @@ def initialize_drive():
         file = service.files().create(body=file_metadata,
                                             media_body=media,
                                             fields="id").execute()
-        print("File ID: "+ file.get("id"))    
+        
+        print("File ID: "+ file.get("id"))   
+        time.sleep(20)
+        # now it is deleted by id
+        service.files().delete(fileId=file.get("id")).execute() 
+        print(x)
     except HttpError as error:
         # TODO(developer) - Handle errors from drive API.
         print(f'An error occurred: {error}')
