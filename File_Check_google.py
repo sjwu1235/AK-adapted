@@ -55,8 +55,8 @@ for ind in temp2.index:
                     items = response.get('files', [])                
                     if (len(items)>0):
                         uploaded+=1
-                        service.files().delete(fileId=items[0]['id']).execute()
-                        print(u'{0} ({1})'.format(items[0]['name'], items[0]['id']))
+                        #service.files().delete(fileId=items[0]['id']).execute()
+                        print(u'already uploaded: {0} ({1})'.format(items[0]['name'], items[0]['id']))
                         upload_indicator=0
                     page_token = response.get('nextPageToken', None)
                     if page_token is None:
@@ -69,7 +69,7 @@ for ind in temp2.index:
                 downloaded+=1
                 if (upload_indicator==1):
                     try:
-                        file_metadata = {'name': pdf_file_name, 'parents': ["1UCcp9d5zuXami-LGi7v5H8v7DJGI8xZA"]}
+                        file_metadata = {'name': pdf_file_name, 'parents': ["1DJ0Ph_-JWSvkzzI70EVCU9JRb1jMp_cO"]}
                         media = MediaFileUpload(directory+"\\"+pdf_file_name, mimetype='application/pdf', resumable=True)
                         file = service.files().create(body=file_metadata,
                                                             media_body=media,
