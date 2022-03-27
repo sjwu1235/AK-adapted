@@ -28,7 +28,7 @@ directory = "C:\\Users\\sjwu1\\Journal_Data"
 temp = pd.read_excel("C:\\Users\\sjwu1\\Journal_Data\\Master lists\\AER_master.xlsx")
 temp2 = pd.read_excel("C:\\Users\\sjwu1\\Journal_Data\\pivots\\AER_pivots.xlsx")
 folder_ID = "1DJ0Ph_-JWSvkzzI70EVCU9JRb1jMp_cO"
-file_type="json"
+file_type="pdf"
 #src_folder = r"C:\Users\sjwu1\Journal_Data\\Scihub"
 #dst_folder = r"C:\Users\sjwu1\Journal_Data\\Scihub_checked"
 
