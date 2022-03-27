@@ -2,7 +2,7 @@
 
 A python program to scrape articles from JSTOR based on some user specified fields. This is a two stage process:
 1. Stage_1_scraper.py scrapes the specified journal page on JSTOR for all issue links and then iterates through each issue page to get links to the first article of each issue eg: a pivot point.
-2. Given a year range, Stage_2_scraper.py scrapes articles issue by issue using the pivots excel file from stage 1 and dumps metadata scraped from each article page into datadump.xlsx at the end of scraping an issue.
+2. Given a year range, Stage_2_scraper.py scrapes articles issue by issue using the pivots excel file from stage 1 and dumps metadata scraped from each article page into a .json file with the same JSTOR reference as the pdf. Both the .pdf and .json files are uploaded every time.
 
 Users of this program will have to have access to an affliated institution's username and password.
 
@@ -16,6 +16,7 @@ This is based off the original Aaron's Kit scraper program hosted at [https://gi
 - [Assumptions](#assumptions)
 - [Quick start](#quick-start)
 - [Scihub](#scihub)
+- [Useful tools: File Checking scripts](#file-check)
 - [Speed test](#speed-test)
 - [Run The Applications](#run-the-applications)
 - [Additional Docs](#additional-docs)
@@ -30,10 +31,9 @@ This is based off the original Aaron's Kit scraper program hosted at [https://gi
 
 ## Quick start
 1. Check if you have all the programs used in the testing.py and testing2.py files (if not use 'pip install 'package name' ')
-2. Copy datadump.xlsx into a folder where you want to store the pdfs, ensure that there is at least 20GB available on the disk
-3. Take note of the folder path where datadump.xlsx is eg: "C:\Users\xxxx\Journal_Data"
-4. Conduct a speed test on the download speed. See [speed test](#speed-test)
-5. Now edit the inputs.json file in the cloned directory, it currently is set to scrape AER as an example
+2. Create a folder where you want to store the pdfs, ensure that there is at least 20GB available on the disk, take note of the folder name eg: "C:\\Users\\xxxx\\Journal_Data".
+3. Conduct a speed test on the download speed. See [speed test](#speed-test)
+4. Now edit the inputs.json file in the cloned directory, it is currently set to scrape AER as an example
 {"journal_URL":"URL of journal page on JSTOR",
  "journal_name":"Name of journal",
  "directory":"folder path to pdf data eg: C:\\Users\\xxxx\\Journal_Data", 
@@ -43,10 +43,10 @@ This is based off the original Aaron's Kit scraper program hosted at [https://gi
  "end_year": year to stop scraping (inclusive) eg: 2020, 
  "sleep_time": time taken to download pdf in speed test. Suggest 20 or longer
  "affiliations": 0 for don't scrape and 1 for do scrape author affiliations}
-6. Note: if the pivot or master list files do not exist, running Stage_1_scraper.py will construct them and save it to whatever files are named in the pivot and master fields. 
-7. Note: When editing inputs.json, replace all single "\" characters in file paths with "\\" eg: "C:\Users\xxxx\Journal_Data" to "C:\\Users\\xxxx\\Journal_Data"
-8. Run the scrapers. First Stage_1_scraper.py then Stage_2_scraper.py. See [Run The Applications](#run-the-applications) for details
-9. Alternatively, get an excel file of pivot URLs and just run Stage_2_scraper.py
+5. **Note**: if the pivot or master list files do not exist, running Stage_1_scraper.py will construct them and save it to whatever files are named in the pivot and master fields. 
+6. **Note**: When editing inputs.json, replace all single "\\" characters in file paths with "\\\\" eg: "C:\\Users\\xxxx\\Journal_Data" to "C:\\\\Users\\\\xxxx\\\\Journal_Data"
+7. Run the scrapers. First Stage_1_scraper.py then Stage_2_scraper.py. See [Run The Applications](#run-the-applications) for details
+8. Alternatively, get an excel file of pivot URLs and just run Stage_2_scraper.py
 
 ## Scihub
 An alternative script scihub.py scrapes articles from SciHub using the masterlist and pivot list generated from Stage_1_scraper.py. To run:
@@ -58,6 +58,20 @@ An alternative script scihub.py scrapes articles from SciHub using the masterlis
 "year": the year that you want to scrape eg: 1950, 
 "sleep_time": 20}
 2. Run 'python scihub.py'
+**Note**: When editing inputs.json, replace all single "\\" characters in file paths with "\\\\" eg: "C:\\Users\\xxxx\\Journal_Data" to "C:\\\\Users\\\\xxxx\\\\Journal_Data"
+
+**Warning** Google integration has not been added to scihub.py
+
+## Useful tools: File Checking scripts
+
+There are two scripts that can be used to check how much of a journal has been downloaded. File_Check.py and File_Check_google.py. You require the masterlist and pivot excel file of a journal to run them. As well as a directory to which you have downloaded or expect to download your scraped pdfs and jsons.
+
+1. File_check.py only checks the local directory specified for how many files of a specified journal have been downloaded according to the masterlist of a journal.
+2. File_check_google.py checks the folders for which your service account has at least viewer access to determine what files of a journal have been uploaded. It also checks whether each file in the local directory you have specified belongs to the journal and uploads the file if it is not on the google drive. You will need your service account to have edit access to the drive folder to which you wish to upload.
+
+Both scripts output logs of the number of files that have been downloaded per issue of a journal. Because File_check.py does not use drive API it is significantly faster than File_check_google.py 
+
+**details on logs**
 
 ## Speed test
 ### Option 1
@@ -65,7 +79,7 @@ Conduct a speed test manually to test hardware and download speed. Go to JSTOR a
 Newer papers can get as large as 5mb, so the scraper needs enough time to finish the download and return to the JSTOR page.
 
 ### Option 2
-Alternatively, run a speed test (google 'speed test'). The internet speed test below shows a connection that was able to handle downloading 140 papers per hour using a 20s sleep time without crashing over a 12 hour period. Take note of your download speed and latency compared to that in the reference and adjust the sleep_time field in inputs.json accordingly. It should deliver similar performance provided your internet speed is as good or better than the speed test screenshot above (20mbps download, 10mbps upload, 40ms latency). If not, please set a higher sleep time.
+Alternatively, run a speed test (google 'speed test'). The internet speed test below shows a connection that was able to handle downloading and uploading 55 papers per hour using a 20s sleep time without crashing over a 12 hour period. Take note of your download speed and latency compared to that in the reference and adjust the sleep_time field in inputs.json accordingly. It should deliver similar performance provided your internet speed is as good or better than the speed test screenshot above (20mbps download, 10mbps upload, 40ms latency). If not, please set a higher sleep time.
 
 
 ![image](https://user-images.githubusercontent.com/80747408/150649316-f92d129e-5aee-490d-8c84-4ca3eca4ab3a.png)
@@ -76,7 +90,7 @@ Run the journal issue scraper
 ```
 python Stage_1_scraper.py
 ```
-This stage does not require a institutional login. In fact, please do not try to login.
+This stage does not require a institutional login. In fact, please do not login.
 
 After navigating to the journal page, manually verify that the scraper expands all the decade fields. This will take about 2 minutes. This is to ensure that all issue URLs are scraped in this stage. Thereafter, you can leave it undisturbed to run. This scraper will iterate through each issue of the journal and scrape the issue's first article URL which will be used in the stage_2_scraper. The output from this scraper will be saved to whatever excel file path is in the 'pivots' field of inputs.json.
 
@@ -89,7 +103,7 @@ In the event of a stall, eg: page taking too long to load or a reCAPTCHA, the sc
 Currently, the scraper cannot detect whether you have logged in or not. So please make sure to follow the instructions.
 
 
-**detailed stall troubleshooting **
+**detailed stall troubleshooting**
 Still to come
 
 

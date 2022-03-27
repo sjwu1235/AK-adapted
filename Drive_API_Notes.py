@@ -87,7 +87,7 @@ def initialize_drive():
         time.sleep(20)
         # now it is deleted by id
         service.files().delete(fileId=file.get("id")).execute() 
-        print(x)
+        #print(x)
     except HttpError as error:
         # TODO(developer) - Handle errors from drive API.
         print(f'An error occurred: {error}')
