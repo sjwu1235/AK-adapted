@@ -56,7 +56,7 @@ for ind in temp2.index:
                     if (len(items)>0):
                         uploaded+=1
                         #service.files().delete(fileId=items[0]['id']).execute()
-                        print(u'already uploaded: {0} ({1})'.format(items[0]['name'], items[0]['id']))
+                        #print(u'already uploaded: {0} ({1})'.format(items[0]['name'], items[0]['id']))
                         upload_indicator=0
                     page_token = response.get('nextPageToken', None)
                     if page_token is None:
@@ -74,7 +74,7 @@ for ind in temp2.index:
                         file = service.files().create(body=file_metadata,
                                                             media_body=media,
                                                             fields='id').execute()
-                        print ('File ID: '+ file.get('id'))
+                        print ('File uploaded this session: '+ pdf_file_name+' ('+file.get('id')+')')
                         uploaded+=1
                     except Exception as e:
                         print(e)

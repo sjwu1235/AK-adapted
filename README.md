@@ -37,16 +37,16 @@ This is based off the original Aaron's Kit scraper program hosted at [https://gi
 {"journal_URL":"URL of journal page on JSTOR",
  "journal_name":"Name of journal",
  "directory":"folder path to pdf data eg: C:\\Users\\xxxx\\Journal_Data", 
- "datadump":"path to datadump.xlsx eg: C:\\Users\\xxxx\\Journal_Data\\datadump.xlsx", 
- "pivots":"path to pivots file you can name it anything each session eg: C:\\Users\\xxxx\\Journal_Data\\pivots.xlsx",
+ "pivots":"path to pivots file eg: C:\\Users\\xxxx\\Journal_Data\\pivots.xlsx",
  "master":"path to masterlist file C:\\Users\\xxxx\\Journal_Data\\Masterlist.xlsx",
  "start_year": year to start scraping eg: 2000, 
  "end_year": year to stop scraping (inclusive) eg: 2020, 
  "sleep_time": time taken to download pdf in speed test. Suggest 20 or longer
  "affiliations": 0 for don't scrape and 1 for do scrape author affiliations}
-6. Note: When editing inputs.json, replace all single "\" characters in file paths with "\\" eg: "C:\Users\xxxx\Journal_Data" to "C:\\Users\\xxxx\\Journal_Data"
-7. Run the scrapers. First Stage_1_scraper.py then Stage_2_scraper.py. See [Run The Applications](#run-the-applications) for details
-8. Alternatively, get an excel file of pivot URLs and just run Stage_2_scraper.py
+6. Note: if the pivot or master list files do not exist, running Stage_1_scraper.py will construct them and save it to whatever files are named in the pivot and master fields. 
+7. Note: When editing inputs.json, replace all single "\" characters in file paths with "\\" eg: "C:\Users\xxxx\Journal_Data" to "C:\\Users\\xxxx\\Journal_Data"
+8. Run the scrapers. First Stage_1_scraper.py then Stage_2_scraper.py. See [Run The Applications](#run-the-applications) for details
+9. Alternatively, get an excel file of pivot URLs and just run Stage_2_scraper.py
 
 ## Scihub
 An alternative script scihub.py scrapes articles from SciHub using the masterlist and pivot list generated from Stage_1_scraper.py. To run:
@@ -76,6 +76,8 @@ Run the journal issue scraper
 ```
 python Stage_1_scraper.py
 ```
+This stage does not require a institutional login. In fact, please do not try to login.
+
 After navigating to the journal page, manually verify that the scraper expands all the decade fields. This will take about 2 minutes. This is to ensure that all issue URLs are scraped in this stage. Thereafter, you can leave it undisturbed to run. This scraper will iterate through each issue of the journal and scrape the issue's first article URL which will be used in the stage_2_scraper. The output from this scraper will be saved to whatever excel file path is in the 'pivots' field of inputs.json.
 
 Run article scraper
@@ -84,7 +86,7 @@ python Stage_2_scraper.py
 ```
 Follow the instructions in the command line. You will need to login to your institution on the Chromium window and then navigate to the JSTOR homepage and click the accept button on the cookies.
 In the event of a stall, eg: page taking too long to load or a reCAPTCHA, the script will instruct you to resolve the URL and allow it to continue. Hence, I don't reccomend setting the window to headless as you may be required to help the scraper sometimes.
-
+Currently, the scraper cannot detect whether you have logged in or not. So please make sure to follow the instructions.
 
 
 **detailed stall troubleshooting **

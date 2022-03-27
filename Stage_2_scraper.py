@@ -41,8 +41,6 @@ with open(r'inputs.json', 'r') as input_file:
     input_deets = json.load(input_file)
 
 directory = input_deets['directory']
-datadump_loc = input_deets['datadump']
-datadump=pd.read_excel(datadump_loc)
 masterlist = pd.read_excel(input_deets['master'])
 start_loc = input_deets['pivots']
 start_year=input_deets['start_year']
@@ -119,7 +117,6 @@ for ind in URL_starts.index:
     
     for a in issue_masters.index:
         path = directory+"\\"+issue_masters['stable_url'][a].split("/")[-1]+".pdf"
-        print(not datadump[['stable_url']].isin({'stable_url': [issue_masters['stable_url'][a]]}).all(1).any())
         print(not os.path.isfile(path))
         print(issue_masters['stable_url'][a])
         check=isUpload(issue_masters['stable_url'][a].split("/")[-1]+".pdf")
@@ -181,7 +178,6 @@ for ind in URL_starts.index:
                 print("was not able to go to next item")
                 print("seems to have reached end of issue")
                 x=1
-                datadump.to_excel(datadump_loc,index=False)  
             continue
         # edge case: some do have author affiliation and some do not
         affiliations=""
@@ -275,35 +271,37 @@ for ind in URL_starts.index:
         
         #click download but only if not there already
         if (check):
-            driver.find_element_by_xpath(r".//mfe-download-pharos-button[@data-sc='but click:pdf download']").click()
-        
-            # bypass t&c
-            try:
-                WebDriverWait(driver, 10).until(
-                    expected_conditions.presence_of_element_located((By.ID, 'content-viewer-container'))
-                    ) 
-                driver.find_element_by_xpath(r".//mfe-download-pharos-button[@data-qa='accept-terms-and-conditions-button']").click()
-            except:
-                print("no t&c")
+            if (not os.path.isfile(path)):
+                driver.find_element_by_xpath(r".//mfe-download-pharos-button[@data-sc='but click:pdf download']").click()
+            
+                # bypass t&c
+                try:
+                    WebDriverWait(driver, 10).until(
+                        expected_conditions.presence_of_element_located((By.ID, 'content-viewer-container'))
+                        ) 
+                    driver.find_element_by_xpath(r".//mfe-download-pharos-button[@data-qa='accept-terms-and-conditions-button']").click()
+                except:
+                    print("no t&c")
 
         #need to allow time for download to complete and return to initial page
         time.sleep(10+sleep_time*random.random())
-        if (check&os.path.isfile(path)):
-            try:
-                # Uploading a file
-                file_metadata = {
-                    "name": url.split("/")[-1]+".pdf",
-                    "parents": [folder_id]
-                    }
-                # first argument is path to pdf on local
-                media = MediaFileUpload(path, mimetype="application/pdf")
-                file = service.files().create(body=file_metadata,
-                                                    media_body=media,
-                                                    fields="id").execute()
-                print("File ID: "+ file.get("id")) 
-            except HttpError as error:
-                # TODO(developer) - Handle errors from drive API.
-                print(f'An error occurred: {error}')
+        if (check):
+            if (os.path.isfile(path)):
+                try:
+                    # Uploading a file
+                    file_metadata = {
+                        "name": url.split("/")[-1]+".pdf",
+                        "parents": [folder_id]
+                        }
+                    # first argument is path to pdf on local
+                    media = MediaFileUpload(path, mimetype="application/pdf")
+                    file = service.files().create(body=file_metadata,
+                                                        media_body=media,
+                                                        fields="id").execute()
+                    print("File ID: "+ file.get("id")) 
+                except HttpError as error:
+                    # TODO(developer) - Handle errors from drive API.
+                    print(f'An error occurred: {error}')
 
         #inserting this thing
         #if json not online and file has been downloaded

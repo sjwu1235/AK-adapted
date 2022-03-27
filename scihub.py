@@ -113,6 +113,7 @@ for i in processed_list:
             print('trying an alternative method...')
             temp=driver.find_element_by_xpath(r".//div[@id='buttons']//button").get_attribute('onclick')[15:-1]
             driver.find_element_by_xpath(r".//div[@id='buttons']//button").click()
+            print('managed to click the button')
             time.sleep(60) # give it 60 seconds to download
             
             filename = re.search('(.+?)/(.+?)/(.+?)/(.+?)/(.+?)\?download=true', temp).group(5)
@@ -129,3 +130,4 @@ for i in processed_list:
             print("nope they really don't have one.")
             time.sleep(15)
         
+print('script complete')
