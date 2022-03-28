@@ -89,7 +89,7 @@ for ind in URL_starts.index:
         continue    
     x=0
     while x==0:
-        '''
+        
         # code for accepting cookies
         try:
             WebDriverWait(driver, 10).until(
@@ -99,7 +99,7 @@ for ind in URL_starts.index:
             print('cookies accepted')
         except:
             print("Please accept cookies else continue if there aren't any")
-        '''
+            
         try:
             print('execute 1')
             WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "metadata-info-tab")))
