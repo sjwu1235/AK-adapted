@@ -43,49 +43,49 @@ for ind in temp2.index:
     session_uploaded=0
     for ind2 in temp3.index:
         file_name=temp['stable_url'][ind2].split('/')[-1]+"."+file_type
-        if (temp2['year'][ind]==1983):
+        if (temp2['year'][ind]>=1940):
             fulllist_s_1940+=1
             #print(file_name+" "+str(os.path.isfile(directory+file_name)))
             upload_indicator=1 #defaults to upload - we can handle duplicates
-            try:
-                page_token = None
-                while True:
-                    # Call the Drive v3 API
-                    # "mimeType = 'application/vnd.google-apps.folder'" # files that are folders
-                    # "name ='354.pdf'" #search by name
-                    response = service.files().list(q="name ='"+file_name+"'",
-                        fields="nextPageToken, files(id,name)",
-                        pageToken=page_token).execute()
-                    items = response.get('files', [])                
-                    if (len(items)>0):
-                        uploaded+=1
-                        #service.files().delete(fileId=items[0]['id']).execute()
-                        #print(u'already uploaded: {0} ({1})'.format(items[0]['name'], items[0]['id']))
-                        upload_indicator=0
-                    page_token = response.get('nextPageToken', None)
-                    if page_token is None:
-                        break
-                    print(count)
-            except HttpError as error:
-                # TODO(developer) - Handle errors from drive API.
-                print(f'An error occurred: {error}')
-            if(os.path.isfile(directory+"\\"+file_name)):
-                downloaded+=1
-                if (upload_indicator==1):
-                    try:
-                        file_metadata = {'name': file_name, 'parents': [folder_ID]}
-                        media = MediaFileUpload(directory+"\\"+file_name, mimetype='application/'+file_type, resumable=True)
-                        file = service.files().create(body=file_metadata,
-                                                            media_body=media,
-                                                            fields='id').execute()
-                        print ('File uploaded this session: '+ file_name+' ('+file.get('id')+')')
-                        uploaded+=1
-                        session_uploaded+=1
-                    except Exception as e:
-                        print(e)
-                #source = directory + "\\"+ file_name
-                #destination = dst_folder +"\\"+ file_name
-                #shutil.move(source,destination)
+        try:
+            page_token = None
+            while True:
+                # Call the Drive v3 API
+                # "mimeType = 'application/vnd.google-apps.folder'" # files that are folders
+                # "name ='354.pdf'" #search by name
+                response = service.files().list(q="name ='"+file_name+"'",
+                    fields="nextPageToken, files(id,name)",
+                    pageToken=page_token).execute()
+                items = response.get('files', [])                
+                if (len(items)>0):
+                    uploaded+=1
+                    #service.files().delete(fileId=items[0]['id']).execute()
+                    #print(u'already uploaded: {0} ({1})'.format(items[0]['name'], items[0]['id']))
+                    upload_indicator=0
+                page_token = response.get('nextPageToken', None)
+                if page_token is None:
+                    break
+                print(count)
+        except HttpError as error:
+            # TODO(developer) - Handle errors from drive API.
+            print(f'An error occurred: {error}')
+        if(os.path.isfile(directory+"\\"+file_name)):
+            downloaded+=1
+            if (upload_indicator==1):
+                try:
+                    file_metadata = {'name': file_name, 'parents': [folder_ID]}
+                    media = MediaFileUpload(directory+"\\"+file_name, mimetype='application/'+file_type, resumable=True)
+                    file = service.files().create(body=file_metadata,
+                                                        media_body=media,
+                                                        fields='id').execute()
+                    print ('File uploaded this session: '+ file_name+' ('+file.get('id')+')')
+                    uploaded+=1
+                    session_uploaded+=1
+                except Exception as e:
+                    print(e)
+            #source = directory + "\\"+ file_name
+            #destination = dst_folder +"\\"+ file_name
+            #shutil.move(source,destination)
     total_session+=session_uploaded
     total_uploaded+=uploaded
     total=total+downloaded
