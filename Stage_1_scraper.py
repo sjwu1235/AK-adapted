@@ -162,9 +162,12 @@ def Run(driver, Jname, directory):
 
 if __name__ == "__main__":
     # Journal page URL
-    URL = 'https://www.jstor.org/journal/jfinance'
-    directory = "C:\\Users\\sjwu1\\Journal_Data\\Extra"
-    Jname='jfinance'
+    with open(r'inputs.json', 'r') as input_file:
+        input_deets = json.load(input_file)
+
+    URL = input_deets['journal_URL']
+    directory = input_deets['directory']
+    Jname=input_deets['journal_name']
     Chrome_driver=get_driver(directory, URL)
     output=Run(Chrome_driver, Jname, directory)
     output[0].to_excel(directory+"\\"+Jname+"_pivots.xlsx", index=False)
