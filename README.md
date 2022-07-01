@@ -42,8 +42,7 @@ This is based off the original Aaron's Kit scraper program hosted at [https://gi
  "master":"path to masterlist file C:\\Users\\xxxx\\Journal_Data\\Masterlist.xlsx",
  "start_year": year to start scraping eg: 2000, 
  "end_year": year to stop scraping (inclusive) eg: 2020, 
- "sleep_time": time taken to download pdf in speed test. Suggest 20 or longer
- "affiliations": 0 for don't scrape and 1 for do scrape author affiliations}
+ "sleep_time": time taken to download pdf in speed test. Suggest 20 or longer}
 6. Note: When editing inputs.json, replace all single "\" characters in file paths with "\\" eg: "C:\Users\xxxx\Journal_Data" to "C:\\Users\\xxxx\\Journal_Data"
 7. Run the scrapers. First Stage_1_scraper.py then Stage_2_scraper.py. See [Run The Applications](#run-the-applications) for details
 8. Alternatively, get an excel file of pivot URLs and just run Stage_2_scraper.py
