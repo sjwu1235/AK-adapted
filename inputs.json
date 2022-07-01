@@ -1,1 +1,12 @@
-{"journal_URL":"https://www.jstor.org/journal/amereconrevi","directory":"C:\\Users\\sjwu1\\Journal_Data", "datadump":"C:\\Users\\sjwu1\\Journal_Data\\datadump.xlsx", "pivots":"C:\\Users\\sjwu1\\Journal_Data\\pivots\\AER_singles.xlsx", "master":"C:\\Users\\sjwu1\\Journal_Data\\Master lists\\AER_master.xlsx","journal_name":"AER","start_year":1951, "end_year":1951, "sleep_time":20, "affiliations":0}
+{
+    "journal_URL":"https://www.jstor.org/journal/amereconrevi",
+    "directory":"C:\\Users\\sjwu1\\Journal_Data\\JPE_data", 
+    "datadump":"C:\\Users\\sjwu1\\Journal_Data\\datadumps\\datadump.xlsx", 
+    "pivots":"C:\\Users\\sjwu1\\Journal_Data\\pivots\\JPE_pivots.xlsx", 
+    "master":"C:\\Users\\sjwu1\\Journal_Data\\Master lists\\JPE_master.xlsx",
+    "journal_name":"JPE",
+    "start_year":1980, 
+    "end_year":2016, 
+    "sleep_time":15, 
+    "affiliations":0
+}

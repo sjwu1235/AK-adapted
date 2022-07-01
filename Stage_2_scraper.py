@@ -14,6 +14,16 @@ from selenium.webdriver.common.by import By
 
 from connection_controllers.gen_connection_controller import GenConnectionController
 
+
+def accept_cookies(driver):
+    try:
+        WebDriverWait(driver, 10).until(
+            expected_conditions.element_to_be_clickable((By.XPATH, r"//button[@id='onetrust-accept-btn-handler']"))
+        )
+        driver.find_element(By.XPATH, r".//button[@id='onetrust-accept-btn-handler']").click()
+    except:
+        print('no cookies')
+
 with open(r'inputs.json', 'r') as input_file:
 
     input_deets = json.load(input_file)
@@ -30,19 +40,15 @@ starts = pd.read_excel(start_loc)
 URL_starts = starts[(starts['year']>=start_year)&(starts['year']<=end_year)]
 
 
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36'
 chrome_options = webdriver.ChromeOptions()
 
 # don't recommend this because this scraper may require some human intervention if it crashes but...
 # uncomment below if you dont want the google chrome browser UI to show up.
 #chrome_options.add_argument('--headless')
 
-curdir = Path.cwd().joinpath("BrowserProfile")
-#chrome_options.add_argument("user-data-dir=selenium") #this is supposed to automatically manage cookies but it's not working
 chrome_options.add_argument(f"user-agent={USER_AGENT}")
 chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-chrome_options.add_extension("./extension_1_38_6_0.crx")
-chrome_options.add_extension("./extension_busters.crx")
 chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 chrome_options.add_experimental_option("useAutomationExtension", False)
 chrome_options.add_experimental_option("prefs", {
@@ -129,30 +135,23 @@ for ind in URL_starts.index:
             continue
         # edge case: some do have author affiliation and some do not
         affiliations=""
-        if (input_deets['affiliations']==1):
-            try:
-                WebDriverWait(driver, 10).until(
-                        expected_conditions.presence_of_element_located((By.CLASS_NAME, 'contrib-group'))
-                        ) 
-                author_info=driver.find_elements_by_xpath(r".//div[@class='contrib-group']//div//span")
-                count=0
-                for item in author_info:
-                    if (count%2) == 0:
-                        affiliations=affiliations+item.text+' - '
-                    else:
-                        affiliations=affiliations+item.text+'. '
-                    count+=1
-                print(affiliations)
-            except:
-                print('no author affiliation') 
-                
-
-        # some articles are rather reviews or comments or replies and will not have abstracts
-        abstract=""
+        
         try:
-            abstract=driver.find_element_by_xpath(r".//div[@class='abstract']").text
+            WebDriverWait(driver, 10).until(
+                    expected_conditions.presence_of_element_located((By.CLASS_NAME, 'contrib-group'))
+                    ) 
+            author_info=driver.find_elements_by_xpath(r".//div[@class='contrib-group']//div//span")
+            count=0
+            for item in author_info:
+                if (count%2) == 0:
+                    affiliations=affiliations+item.text+' - '
+                else:
+                    affiliations=affiliations+item.text+'. '
+                count+=1
+            print(affiliations)
         except:
-            abstract=None
+            print('no author affiliation') 
+                
         #locating references
         ref_raw=''
         ref_struct=''
@@ -236,7 +235,7 @@ for ind in URL_starts.index:
         #inserting this thing
     
         if (not datadump[['stable_url']].isin({'stable_url': [url]}).all(1).any())&(os.path.isfile(path)):
-            dict = {'stable_url': url, 'abstract': abstract, 'affiliations':affiliations,'raw':ref_raw,'footnotes':foot_struct,'references':ref_struct}
+            dict = {'stable_url': url, 'affiliations':affiliations,'raw':ref_raw,'footnotes':foot_struct,'references':ref_struct}
             datadump=datadump.append(dict, ignore_index=True)
             datadump.to_excel(datadump_loc,index=False)  
         
