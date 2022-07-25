@@ -37,10 +37,12 @@ This is based off the original Aaron's Kit scraper program hosted at [https://gi
  "journal_name":"Name of journal",
  "directory":"folder path to pdf data eg: C:/Users/xxxx/Journal_Data", 
  "pivots":"path to pivots file you can name it anything each session eg: C:/Users/xxxx/Journal_Data/pivots.xlsx",
+ "pivot_scrape_indicator": 1 if you don't have a pivot file output yet or 0 if you have the pivot file and would like to pick up from where you stopped the program,
  "master":"path to masterlist file C:/Users/xxxx/Journal_Data/Masterlist.xlsx",
  "start_year": year to start scraping eg: 2000, 
  "end_year": year to stop scraping (inclusive) eg: 2020, 
- "sleep_time": time taken to download pdf in speed test. Suggest 20 or longer}
+ "sleep_time": time taken to download pdf in speed test. Suggest 20 or longer
+ "affiliations": 0 for don't scrape affiliations or 1 for scrape affiliations}
 6. Run the scrapers. First Stage_1_scraper.py then Stage_2_scraper.py. See [Run The Applications](#run-the-applications) for details
 7. Alternatively, get a copy of pivot and masterlist excel files and just run Stage_2_scraper.py
 
