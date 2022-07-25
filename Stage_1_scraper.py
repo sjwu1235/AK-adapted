@@ -173,15 +173,9 @@ def get_issue_list(driver, Jname):
     return data
 
 
-def Run(driver, Jname, directory, scrape_issue):
+def Run(driver, directory, data):
     throttle=0
     masterlist=pd.DataFrame()
-    data=None
-    if scrape_issue==1:
-        data=get_issue_list(driver, Jname)
-        data.to_excel(directory / (Jname+"_pivots.xlsx"), index=False)
-    else:
-        data=pd.read_excel(directory / (Jname+"_pivots.xlsx"))
     
     for ind in data.index:   
         time.sleep(5*random.random())   
@@ -204,13 +198,13 @@ def Run(driver, Jname, directory, scrape_issue):
                         
             indicator=get_citation(driver, 0, 10)
             if indicator == 0: 
-                print('Problem')
+                print('Unknown problem')
                 print('Please refresh and download citation.txt from '+ data['issue_url'].iloc[ind] + 'and rename to ' + data['issue_url'].iloc[ind].split('/')[-1] +'.txt')
                 print('Press Enter to continue')
                 input()
 
         masterlist=pd.concat([masterlist, process_citation(directory, data['issue_url'].iloc[ind])], ignore_index=True)
-    return [data, masterlist]
+    return masterlist
         
 if __name__ == "__main__":
     # Journal page URL
@@ -222,9 +216,20 @@ if __name__ == "__main__":
     Jname=input_deets['journal_name']
     pivots=input_deets['pivots']
     masters=input_deets['master']
-
+    
     Chrome_driver=get_driver(directory, URL)
-    output=Run(Chrome_driver, Jname, directory, input_deets['pivot_scrape_indicator'])
-    output[1].to_excel(masters, index=False)
-    Chrome_driver.close()
+    issue_data=None
 
+    if input_deets['pivot_scrape_indicator']==1:
+        issue_data=get_issue_list(Chrome_driver, Jname)
+        issue_data.to_excel(directory / pivots, index=False)
+    else:
+        issue_data=pd.read_excel(directory / pivots)
+
+    output=Run(Chrome_driver, directory, issue_data)
+    
+    if len(output['issue_url'].unique())==len(issue_data):
+        output.to_excel(masters, index=False)
+    else:
+        print('Rerun scraper. Masterlist incomplete')
+    Chrome_driver.close()
