@@ -1,9 +1,9 @@
 {
     "journal_URL":"https://www.jstor.org/journal/revifinastud",
     "directory":"C:/Users/sjwu1/Journal_Data/Extra", 
-    "datadump":"C:/Users/sjwu1/Journal_Data/datadumps/datadump.xlsx", 
     "pivots":"C:/Users/sjwu1/Journal_Data/Extra/revifinastud_pivots.xlsx", 
     "master":"C:/Users/sjwu1/Journal_Data/Extra/revifinastud_master.xlsx",
+    "pivot_scrape_indicator": 1,
     "journal_name":"revifinastud",
     "start_year":1980, 
     "end_year":2016, 
