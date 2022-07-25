@@ -210,7 +210,7 @@ def Run(driver, Jname, directory, scrape_issue):
                 input()
 
         masterlist=pd.concat([masterlist, process_citation(directory, data['issue_url'].iloc[ind])], ignore_index=True)
-    masterlist.to_excel(directory / (Jname+"_master.xlsx"), index=False)
+    return [data, masterlist]
         
 if __name__ == "__main__":
     # Journal page URL
@@ -220,8 +220,11 @@ if __name__ == "__main__":
     URL = input_deets['journal_URL']
     directory = Path(input_deets['directory'])
     Jname=input_deets['journal_name']
+    pivots=input_deets['pivots']
+    masters=input_deets['master']
 
     Chrome_driver=get_driver(directory, URL)
-    Run(Chrome_driver, Jname, directory, 1)
-    #Chrome_driver.close()
+    output=Run(Chrome_driver, Jname, directory, input_deets['pivot_scrape_indicator'])
+    output[1].to_excel(masters, index=False)
+    Chrome_driver.close()
 
