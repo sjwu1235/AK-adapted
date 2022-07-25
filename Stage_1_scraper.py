@@ -21,7 +21,7 @@ COLS = ['year','issue_url','Jstor_issue_text','journal']
 # cookie acceptor
 def accept_cookies(driver):
     try:
-        WebDriverWait(driver, 20).until(
+        WebDriverWait(driver, 15).until(
             expected_conditions.element_to_be_clickable((By.ID, 'onetrust-accept-btn-handler'))
         )
         driver.find_element(By.ID, 'onetrust-accept-btn-handler').click()
@@ -38,6 +38,7 @@ def recaptcha_check(driver):
         print('please pass recaptcha and allow to resolve')
         print('then press enter to continue')
         input()
+        recaptcha_check(driver)
     except Exception as e:
         print('no_recaptcha')
         #print(e)
@@ -70,7 +71,6 @@ def process_citation(directory, issue_url):
     if os.path.exists(final_name)==True:
         file_path=final_name
     
-    print(file_path)
     #poll directory for file existence
     while os.path.exists(file_path)==False:
         time.sleep(5)
@@ -103,7 +103,8 @@ def process_citation(directory, issue_url):
         return pd.DataFrame(data).transpose()  
     else:
         print("Citations did not load correctly. Citation file for "+issue_url+" will be deleted. This will be re-downloaded next session. ")
-        os.remove(file_path)
+        if os.path.exists(file_path)==True:
+            os.remove(file_path)
         return pd.DataFrame()
 
 def get_driver(directory, URL):
@@ -131,6 +132,7 @@ def get_driver(directory, URL):
     except:
         print("Failed to access journal page")
         driver.refresh()
+        time.sleep(30)
         recaptcha_check(driver)
 
     time.sleep(5)
@@ -151,6 +153,9 @@ def get_issue_list(driver, Jname):
             element.click()
     except:
         print('Expansion issue')
+        driver.refresh()
+        time.sleep(30)
+
     # let everything settle
     time.sleep(10)
     print('Please ensure that everything is expanded. Then press enter.')
@@ -188,9 +193,10 @@ def Run(driver, Jname, directory, scrape_issue):
             try:
                 WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "bulk_citation_export_form")))
             except:
-                print("Timed out: manually resolve the page to"+ data['issue_url'].iloc[ind])
+                print("Timed out: manually resolve the page to "+ data['issue_url'].iloc[ind])
                 print("Press enter to continue after page completely loads")
                 input()
+                recaptcha_check(driver)
                 
             time.sleep(5+throttle)
             accept_cookies(driver)
