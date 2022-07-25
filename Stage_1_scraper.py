@@ -22,7 +22,6 @@ COLS = ['year','issue_url','Jstor_issue_text','journal']
 def accept_cookies(driver):
     try:
         WebDriverWait(driver, 20).until(
-            
             expected_conditions.element_to_be_clickable((By.ID, 'onetrust-accept-btn-handler'))
         )
         driver.find_element(By.ID, 'onetrust-accept-btn-handler').click()
@@ -51,7 +50,9 @@ def get_citation(driver, attempt, attempt_limit):
         driver.find_element(By.XPATH, r".//div[@id='export-bulk-drop']//toc-view-pharos-button").click()
         time.sleep(5)
         try:
-            WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, r".//div//toc-view-pharos-dropdown-menu[@id='bulk-citation-dropdown']//toc-view-pharos-dropdown-menu-item[5]")))
+            WebDriverWait(driver,20).until(
+                expected_conditions.presence_of_element_located((By.XPATH, r".//div//toc-view-pharos-dropdown-menu[@id='bulk-citation-dropdown']//toc-view-pharos-dropdown-menu-item[5]"))
+                )
             driver.find_element(By.XPATH, r".//div//toc-view-pharos-dropdown-menu[@id='bulk-citation-dropdown']//toc-view-pharos-dropdown-menu-item[5]").click()
             return 1
         except:
@@ -64,11 +65,10 @@ def get_citation(driver, attempt, attempt_limit):
         
 
 def process_citation(directory, issue_url):
-    file_path= None
-    if os.path.exists(directory + '\\'+issue_url.split('https://www.jstor.org/stable/10.2307/')[-1]+'.txt')==True:
-        file_path=directory + '\\'+issue_url.split('https://www.jstor.org/stable/10.2307/')[-1]+'.txt'
-    else:
-        file_path=directory+'\\'+"citations.txt"
+    file_path= directory / "citations.txt"
+    final_name=directory / (issue_url.split('https://www.jstor.org/stable/10.2307/')[-1]+'.txt')
+    if os.path.exists(final_name)==True:
+        file_path=final_name
     
     print(file_path)
     #poll directory for file existence
@@ -98,10 +98,11 @@ def process_citation(directory, issue_url):
                     python_dict[temp[0].strip()]=temp[1].strip()
             data[count]=python_dict
             count+=1
-        os.rename(file_path,directory + '\\'+issue_url.split('https://www.jstor.org/stable/10.2307/')[-1]+'.txt')
+        os.rename(file_path, final_name)
         #print(data)
         return pd.DataFrame(data).transpose()  
     else:
+        print("Citations did not load correctly. Citation file for "+issue_url+" will be deleted. This will be re-downloaded next session. ")
         os.remove(file_path)
         return pd.DataFrame()
 
@@ -114,7 +115,7 @@ def get_driver(directory, URL):
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_experimental_option("prefs", {
-        "download.default_directory": directory, #Change default directory for downloads
+        "download.default_directory": str(directory), #Change default directory for downloads
         "download.prompt_for_download": False, #To auto download the file
         "download.directory_upgrade": True,
         "plugins.always_open_pdf_externally": True, #It will not show PDF directly in chrome
@@ -130,12 +131,13 @@ def get_driver(directory, URL):
     except:
         print("Failed to access journal page")
         driver.refresh()
+        recaptcha_check(driver)
 
     time.sleep(5)
     accept_cookies(driver)
     return driver
 
-def get_issue_list(driver):
+def get_issue_list(driver, Jname):
     
     data=pd.DataFrame(columns=COLS)
     
@@ -171,14 +173,14 @@ def Run(driver, Jname, directory, scrape_issue):
     masterlist=pd.DataFrame()
     data=None
     if scrape_issue==1:
-        data=get_issue_list(driver, Jname, directory)
-        data.to_excel(directory+"\\"+Jname+"_pivots.xlsx", index=False)
+        data=get_issue_list(driver, Jname)
+        data.to_excel(directory / (Jname+"_pivots.xlsx"), index=False)
     else:
-        data=pd.read_excel(directory+"\\"+Jname+"_pivots.xlsx")
+        data=pd.read_excel(directory / (Jname+"_pivots.xlsx"))
     
     for ind in data.index:   
         time.sleep(5*random.random())   
-        file_path=directory + '\\'+data['issue_url'].iloc[ind].split('https://www.jstor.org/stable/10.2307/')[-1]+'.txt'
+        file_path=directory / (data['issue_url'].iloc[ind].split('https://www.jstor.org/stable/10.2307/')[-1]+'.txt')
         #poll directory for file existence
         if os.path.exists(file_path)==False:
 
@@ -201,7 +203,7 @@ def Run(driver, Jname, directory, scrape_issue):
                 input()
 
         masterlist=pd.concat([masterlist, process_citation(directory, data['issue_url'].iloc[ind])], ignore_index=True)
-        masterlist.to_excel(directory+"\\"+Jname+"_master.xlsx", index=False)
+    masterlist.to_excel(directory / (Jname+"_master.xlsx"), index=False)
         
 if __name__ == "__main__":
     # Journal page URL
@@ -209,8 +211,10 @@ if __name__ == "__main__":
         input_deets = json.load(input_file)
 
     URL = input_deets['journal_URL']
-    directory = input_deets['directory']
+    directory = Path(input_deets['directory'])
     Jname=input_deets['journal_name']
+
     Chrome_driver=get_driver(directory, URL)
-    Run(Chrome_driver, Jname, directory, 0)
+    Run(Chrome_driver, Jname, directory, 1)
     #Chrome_driver.close()
+
