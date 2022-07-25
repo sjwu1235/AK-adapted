@@ -186,6 +186,7 @@ def Run(driver, Jname, directory, scrape_issue):
     for ind in data.index:   
         time.sleep(5*random.random())   
         file_path=directory / (data['issue_url'].iloc[ind].split('https://www.jstor.org/stable/10.2307/')[-1]+'.txt')
+        print(file_path)
         #poll directory for file existence
         if os.path.exists(file_path)==False:
 
