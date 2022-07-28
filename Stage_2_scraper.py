@@ -17,12 +17,27 @@ from connection_controllers.gen_connection_controller import GenConnectionContro
 
 def accept_cookies(driver):
     try:
-        WebDriverWait(driver, 10).until(
-            expected_conditions.element_to_be_clickable((By.XPATH, r"//button[@id='onetrust-accept-btn-handler']"))
+        WebDriverWait(driver, 15).until(
+            expected_conditions.element_to_be_clickable((By.ID, 'onetrust-accept-btn-handler'))
         )
-        driver.find_element(By.XPATH, r".//button[@id='onetrust-accept-btn-handler']").click()
-    except:
+        driver.find_element(By.ID, 'onetrust-accept-btn-handler').click()
+    except Exception as e:
         print('no cookies')
+        #print(e)
+        
+def recaptcha_check(driver):
+    try:
+        WebDriverWait(driver, 10).until(
+            expected_conditions.presence_of_element_located((By.ID, 'px-captcha'))
+        )
+        print('recaptcha found')
+        print('please pass recaptcha and allow to resolve')
+        print('then press enter to continue')
+        input()
+        recaptcha_check(driver)
+    except Exception as e:
+        print('no_recaptcha')
+        #print(e)
 
 with open(r'inputs.json', 'r') as input_file:
 
