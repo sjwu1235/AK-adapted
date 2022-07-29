@@ -125,6 +125,7 @@ def get_driver(directory, URL):
     })
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+    driver.set_window_position(1024, 1024, windowHandle ='current')
     driver.get(URL)
     try:
         WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "content")))
@@ -214,17 +215,17 @@ if __name__ == "__main__":
     URL = input_deets['journal_URL']
     directory = Path(input_deets['directory'])
     Jname=input_deets['journal_name']
-    pivots=input_deets['pivots']
-    masters=input_deets['master']
+    pivots=Path(input_deets['pivots'])
+    masters=Path(input_deets['master'])
     
     Chrome_driver=get_driver(directory, URL)
     issue_data=None
 
     if input_deets['pivot_scrape_indicator']==1:
         issue_data=get_issue_list(Chrome_driver, Jname)
-        issue_data.to_excel(directory / pivots, index=False)
+        issue_data.to_excel(pivots, index=False)
     else:
-        issue_data=pd.read_excel(directory / pivots)
+        issue_data=pd.read_excel(pivots)
 
     output=Run(Chrome_driver, directory, issue_data)
     
