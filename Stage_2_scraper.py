@@ -59,8 +59,6 @@ def get_driver(directory, URL):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument(f"user-agent={USER_AGENT}")
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    #chrome_options.add_extension("./extension_1_38_6_0.crx")
-    #chrome_options.add_extension("./extension_busters.crx")
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_experimental_option("prefs", {
@@ -104,7 +102,7 @@ def get_driver(directory, URL):
 
 
 def seek(driver, issue_URL, masterlist, ID):
-
+ #not yet implemented
     return 0
 
 def Run(driver, masterlist, lib_URL, directory, URL_starts,datadump,sleep_time):
@@ -171,9 +169,10 @@ def Run(driver, masterlist, lib_URL, directory, URL_starts,datadump,sleep_time):
             foot_struct=''
             try:
                 #WebDriverWait(driver,10).until(
-                #    expected_conditions.presence_of_element_located((By.ID, 'metadata-info-tab'))
+                #    expected_conditions.presence_of_element_located((By.CLASS_NAME, 'metadata-info-tab'))
                 #)
                 time.sleep(5)
+                #//*[@id="content-viewer-container"]/div[2]/div[1]/div[2]/button[2]/span
                 metadata_tabs=driver.find_elements(By.CLASS_NAME, r"metadata-info-tab-title")
                 for elem in metadata_tabs:
                     if elem.text=='References':
@@ -301,9 +300,6 @@ if __name__ == "__main__":
             datadump = json.load(input_file)
     
     print(URL_starts['URL'])
-    lib_URL='www-jstor-org.ezproxy.uct.ac.za'
-    temp='https://www.jstor.org/stable/43611021'
-    print(regex.sub('https://(.+?)/', 'https://'+lib_URL+'/', temp))
     
     Chrome_driver=get_driver(directory, 'https://www.jstor.org/')
     issue_data=None
