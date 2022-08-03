@@ -1,11 +1,11 @@
 {
-    "journal_URL":"https://www.jstor.org/journal/revifinastud",
-    "directory":"C:/Users/sjwu1/Journal_Data/Extra", 
-    "pivots":"C:/Users/sjwu1/Journal_Data/Extra/revifinastud_pivots.xlsx", 
-    "master":"C:/Users/sjwu1/Journal_Data/Extra/revifinastud_master.xlsx",
-    "pivot_scrape_indicator": 1,
-    "journal_name":"revifinastud",
-    "start_year":1980, 
+    "journal_URL":"https://www.jstor.org/journal/jfinance",
+    "directory":"C:/Users/sjwu1/Journal_Data/Extra/jfinance", 
+    "pivots":"C:/Users/sjwu1/Journal_Data/Extra/jfinance/jfinance_pivots.xlsx", 
+    "master":"C:/Users/sjwu1/Journal_Data/Extra/jfinance/jfinance_master.xlsx",
+    "pivot_scrape_indicator": 0,
+    "journal_name":"jfinance",
+    "start_year":2015, 
     "end_year":2016, 
     "sleep_time":15, 
     "affiliations":0
