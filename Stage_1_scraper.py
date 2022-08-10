@@ -46,15 +46,16 @@ def recaptcha_check(driver):
 def get_citation(driver, attempt, attempt_limit):
     if attempt<attempt_limit:
         time.sleep(5)    
-        driver.find_element(By.ID, 'select_all_citations').click()
-        time.sleep(2)
-        driver.find_element(By.XPATH, r".//div[@id='export-bulk-drop']//toc-view-pharos-button").click()
+        driver.find_element(By.XPATH, r'.//*[@id="select_all_citations"]//span').click()
+       
+        time.sleep(3)
+        driver.find_element(By.ID, 'bulk-cite-button').click()
         time.sleep(5)
         try:
             WebDriverWait(driver,20).until(
-                expected_conditions.presence_of_element_located((By.XPATH, r".//div//toc-view-pharos-dropdown-menu[@id='bulk-citation-dropdown']//toc-view-pharos-dropdown-menu-item[5]"))
+                expected_conditions.presence_of_element_located((By.XPATH, r".//div//mfe-bulk-cite-pharos-dropdown-menu[@id='bulk-citation-dropdown']//mfe-bulk-cite-pharos-dropdown-menu-item[5]"))
                 )
-            driver.find_element(By.XPATH, r".//div//toc-view-pharos-dropdown-menu[@id='bulk-citation-dropdown']//toc-view-pharos-dropdown-menu-item[5]").click()
+            driver.find_element(By.XPATH, r".//div//mfe-bulk-cite-pharos-dropdown-menu[@id='bulk-citation-dropdown']//mfe-bulk-cite-pharos-dropdown-menu-item[5]").click()
             return 1
         except:
             driver.refresh()
@@ -125,7 +126,7 @@ def get_driver(directory, URL):
     })
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-    driver.set_window_position(1024, 1024, windowHandle ='current')
+    #driver.set_window_position(1024, 1024, windowHandle ='current')
     driver.get(URL)
     try:
         WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "content")))
