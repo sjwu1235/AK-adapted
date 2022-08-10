@@ -188,7 +188,7 @@ def Run(driver, directory, data):
 
             driver.get(data['issue_url'].iloc[ind])
             try:
-                WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "bulk_citation_export_form")))
+                WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "toc-export-list")))
             except:
                 print("Timed out: manually resolve the page to "+ data['issue_url'].iloc[ind])
                 print("Press enter to continue after page completely loads")
