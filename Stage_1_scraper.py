@@ -1,9 +1,11 @@
 import json
 from pathlib import Path
+from re import L
 import time
 import pandas as pd
 import random
 import os
+from plyer import notification
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
 from webdriver_manager.chrome import ChromeDriverManager
@@ -16,9 +18,18 @@ from selenium.webdriver.common.by import By
 import regex
 
 
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36'
 COLS = ['year','issue_url','Jstor_issue_text','journal']
 # cookie acceptor
+
+def recaptcha_note():
+    notification.notify(
+        title = "Scraper Stall",
+        message="Recaptcha detected, please resolve" ,
+        app_name='Stage_1_scraper.py',
+        ticker='Help!',
+        timeout=10)
+
 def accept_cookies(driver):
     try:
         WebDriverWait(driver, 15).until(
@@ -34,6 +45,7 @@ def recaptcha_check(driver):
         WebDriverWait(driver, 10).until(
             expected_conditions.presence_of_element_located((By.ID, 'px-captcha'))
         )
+        recaptcha_note()
         print('recaptcha found')
         print('please pass recaptcha and allow to resolve')
         print('then press enter to continue')
@@ -185,7 +197,6 @@ def Run(driver, directory, data):
         print(file_path)
         #poll directory for file existence
         if os.path.exists(file_path)==False:
-
             driver.get(data['issue_url'].iloc[ind])
             try:
                 WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "toc-export-list")))
@@ -196,14 +207,14 @@ def Run(driver, directory, data):
                 recaptcha_check(driver)
                 
             time.sleep(5+throttle)
-            accept_cookies(driver)
-                        
+            accept_cookies(driver)     
+
             indicator=get_citation(driver, 0, 10)
             if indicator == 0: 
                 print('Unknown problem')
-                print('Please refresh and download citation.txt from '+ data['issue_url'].iloc[ind] + 'and rename to ' + data['issue_url'].iloc[ind].split('/')[-1] +'.txt')
-                print('Press Enter to continue')
-                input()
+                print('The scraper is going to shut down now.\nPlease restart the scraper')
+                driver.close()
+                quit()
 
         masterlist=pd.concat([masterlist, process_citation(directory, data['issue_url'].iloc[ind])], ignore_index=True)
     return masterlist

@@ -4,21 +4,19 @@ import time
 import pandas as pd
 import random
 import os
+
+from plyer import notification
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
-
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
-
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
 
 import regex
 
-pd.set_option('display.max_rows', None)
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36'
-COLS = ['year','issue_url','Jstor_issue_text','journal']
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36'
 
 def accept_cookies(driver):
     try:
@@ -35,25 +33,42 @@ def recaptcha_check(driver):
         WebDriverWait(driver, 10).until(
             expected_conditions.presence_of_element_located((By.ID, 'px-captcha'))
         )
-        print('recaptcha found')
-        print('please pass recaptcha and allow to resolve')
-        print('then press enter to continue')
+        recaptcha_note()
+        print('recaptcha found\nplease pass recaptcha and allow to resolve\nthen press enter to continue')
         input()
         recaptcha_check(driver)
     except Exception as e:
         print('no_recaptcha')
         #print(e)
+
+def recaptcha_check2(driver):
     try:
         WebDriverWait(driver, 10).until(
-            expected_conditions.presence_of_element_located((By.ID, 'px-captcha'))
+            expected_conditions.presence_of_element_located((By.CLASS_NAME, 'viewer-error'))
         )
-        print('recaptcha found')
-        print('please pass recaptcha and allow to resolve')
-        print('then press enter to continue')
-        driver.refresh()
+        style=driver.find_element(By.CLASS_NAME, 'viewer-error').get_attribute('style')
+        if style=='display: none;':
+            print('no_recaptcha')
+        else:
+            recaptcha_note()
+            print('recaptcha found\nplease pass recaptcha and allow to resolve\nthen press enter to continue')
+            driver.refresh()
+            input()
+            recaptcha_check(driver)
     except Exception as e:
-        print('no_recaptcha')
-        #print(e)
+        recaptcha_note()
+        print('recaptcha found\nplease pass recaptcha and allow to resolve\nthen press enter to continue')
+        driver.refresh()
+        input()
+        recaptcha_check(driver)  
+
+def recaptcha_note():
+    notification.notify(
+        app_name='Stage_2_scraper.py',
+        title = "Scraper Stall",
+        message="Recaptcha detected, please resolve then enter on command line to continue" ,
+        ticker='Help!',
+        timeout=30)
 
 def get_driver(directory, URL):
     chrome_options = webdriver.ChromeOptions()
@@ -84,7 +99,7 @@ def get_driver(directory, URL):
     print('\nChecking for successful logon')
     try:
         WebDriverWait(driver, 10).until(
-            expected_conditions.element_to_be_clickable((By.ID, "searchBox"))
+            expected_conditions.presence_of_element_located((By.NAME, "Query"))
         )
         print("passed")
         time.sleep(5)
@@ -97,7 +112,6 @@ def get_driver(directory, URL):
         accept_cookies(driver)
     time.sleep(5)
     lib_URL=regex.search('https://(.+?)/', driver.current_url).group(1)
-    print(lib_URL)
     return [driver, lib_URL]
 
 
@@ -105,7 +119,7 @@ def seek(driver, issue_URL, masterlist, ID):
  #not yet implemented
     return 0
 
-def Run(driver, masterlist, lib_URL, directory, URL_starts,datadump,sleep_time):
+def Run(driver, masterlist, lib_URL, directory, URL_starts,sleep_time):
     throttle=0
     print(lib_URL)
     for ind in URL_starts.index:
@@ -115,11 +129,9 @@ def Run(driver, masterlist, lib_URL, directory, URL_starts,datadump,sleep_time):
         
         for a in issue_masters.index:
             path = directory / (issue_masters['URL'][a].split("/")[-1]+".pdf")
-            print(issue_masters['URL'][a].split("/")[-1] not in datadump)
-            print(not os.path.isfile(path))
+            ref_filepath = directory / (issue_masters['URL'][a].split("/")[-1]+".json")
             
-            
-            if (issue_masters['URL'][a].split("/")[-1] not in datadump) or (not os.path.exists(path)):
+            if (not os.path.exists(ref_filepath)) or (not os.path.exists(path)):
                 # point it at the first URL that hasn't been scraped for references or the pdf
                 driver.get(regex.sub(r'http://(.+?)/', r'https://'+lib_URL+'/', issue_masters['URL'][a]))
                 print('starting from: '+issue_masters['URL'][a])
@@ -133,7 +145,7 @@ def Run(driver, masterlist, lib_URL, directory, URL_starts,datadump,sleep_time):
         x=0
         while x==0:
             accept_cookies(driver)
-            
+
             try:
                 print('execute 1')
                 WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "metadata-info-tab-contents")))
@@ -141,13 +153,16 @@ def Run(driver, masterlist, lib_URL, directory, URL_starts,datadump,sleep_time):
                 print("Article page not loading")
                 print("Please resolve page to" + driver.current_url)
                 print("Then enter to continue")
+                recaptcha_note()
                 input()
             
+            recaptcha_check2(driver)
+
             url=driver.find_element(By.CLASS_NAME, 'stable-url').text
             path = directory/(url.split("/")[-1]+".pdf")
-            
+            ref_filepath = directory/(url.split("/")[-1]+".json")
             #check if the record is complete ie: scraped references and pdfs
-            if (issue_masters['URL'][a].split("/")[-1] in datadump) and (os.path.exists(path)):
+            if (os.path.exists(ref_filepath)) and (os.path.exists(path)):
                 try: 
                     print('execute 2')
                     WebDriverWait(driver, 20).until(
@@ -159,8 +174,6 @@ def Run(driver, masterlist, lib_URL, directory, URL_starts,datadump,sleep_time):
                     print("was not able to go to next item")
                     print("seems to have reached end of issue")
                     x=1
-                    with open("datadump.json", "w") as outfile:
-                        json.dump(datadump, outfile) 
                 continue
                     
             #locating references
@@ -168,15 +181,16 @@ def Run(driver, masterlist, lib_URL, directory, URL_starts,datadump,sleep_time):
             ref_struct=''
             foot_struct=''
             try:
-                #WebDriverWait(driver,10).until(
-                #    expected_conditions.presence_of_element_located((By.CLASS_NAME, 'metadata-info-tab'))
-                #)
+                WebDriverWait(driver,10).until(
+                    expected_conditions.presence_of_element_located((By.ID, 'metadata-info-tab-contents'))
+                )
                 time.sleep(5)
                 #//*[@id="content-viewer-container"]/div[2]/div[1]/div[2]/button[2]/span
-                metadata_tabs=driver.find_elements(By.CLASS_NAME, r"metadata-info-tab-title")
-                for elem in metadata_tabs:
-                    if elem.text=='References':
-                        elem.click()
+                metadata_tabs=driver.find_element(By.NAME, r"book")
+                metadata_tabs.click()
+                #for elem in metadata_tabs:
+                #    if elem.text=='References':
+                #        elem.click()
                 
                 time.sleep(2)
                 WebDriverWait(driver,10).until(
@@ -222,13 +236,14 @@ def Run(driver, masterlist, lib_URL, directory, URL_starts,datadump,sleep_time):
                 #print("########### fin ################")
                 print('references scraped')
             except Exception as e: 
-                print(e)
+                #print(e)
                 print('no references in contents')
                 
             time.sleep(3+random.random())
-            
-            driver.find_element(By.CLASS_NAME, r"metadata-info-tab-title").click()
-
+            try:
+                driver.find_element(By.NAME, r"info-inverse").click()
+            except:
+                print('could not click')
             time.sleep(3+random.random())
             
             #click download but only if not there already
@@ -248,11 +263,13 @@ def Run(driver, masterlist, lib_URL, directory, URL_starts,datadump,sleep_time):
             time.sleep(10+sleep_time*random.random())
 
             #inserting this thing
-        
-            if (issue_masters['URL'][a].split("/")[-1] not in datadump)&(os.path.exists(path)):
-                datadump[issue_masters['URL'][a].split("/")[-1]] = {'stable_url': url,'raw':ref_raw,'footnotes':foot_struct,'references':ref_struct}
-                with open("datadump.json", "w") as outfile:
-                    json.dump(datadump, outfile) 
+                       
+            ref_filename=directory/(url.split("/")[-1]+".json")
+            print(os.path.exists(ref_filename))
+            if os.path.exists(ref_filename)==False:
+                temp = {'stable_url': url,'raw':ref_raw,'footnotes':foot_struct,'references':ref_struct}
+                with open(ref_filename, "w") as outfile:
+                    json.dump(temp, outfile) 
             
             # try move to the next article, if it doesn't work, it dumps the data assuming the end of the issue has been reached
             try: 
@@ -293,17 +310,12 @@ if __name__ == "__main__":
     end_year=input_deets['end_year']
     sleep_time=input_deets['sleep_time']
     URL_starts = masters[(masters['year']>=start_year)&(masters['year']<=end_year)].sort_values(['issue_url','URL'], axis=0).groupby('issue_url').head(1)
-
-    datadump={}
-    if (os.path.isfile('datadump.json')):
-        with open(r'datadump.json', 'r') as input_file:
-            datadump = json.load(input_file)
     
     print(URL_starts['URL'])
     
     Chrome_driver=get_driver(directory, 'https://www.jstor.org/')
     issue_data=None
-    Run(Chrome_driver[0], masters, Chrome_driver[1], directory, URL_starts, datadump, sleep_time)
+    Run(Chrome_driver[0], masters, Chrome_driver[1], directory, URL_starts, sleep_time)
     
     Chrome_driver.close()
     
