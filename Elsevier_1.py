@@ -80,7 +80,6 @@ def process_citation(directory, issue_url):
     final_name=directory / (issue_url.split('https://www.sciencedirect.com/journal/')[-1].replace('/','_')+'.bib')
     if os.path.exists(final_name)==True:
         file_path=final_name
-    
     #poll directory for file existence
     
     while os.path.exists(file_path)==False:
@@ -98,12 +97,14 @@ def process_citation(directory, issue_url):
 
     if fl is not None:
         fl=fl.replace('\n','').split('@')
+        print(fl)
         data={}
         count=0
-        for i in fl[2:]:
+        for i in fl[1:]:
             tp=i.find('{')
             tp2=i.find(',')
-            test=i[tp2+1:].replace('{','').split('}, ')
+            test=i[tp2+1:].replace('{','').split('},')
+            print(test)
             python_dict={}
             python_dict['type']=i[:tp]
             python_dict['issue_url']=issue_url
@@ -114,7 +115,7 @@ def process_citation(directory, issue_url):
             data[count]=python_dict
             count+=1
         os.rename(file_path, final_name)
-        #print(data)
+        print(pd.DataFrame(data).transpose())
         return pd.DataFrame(data).transpose()  
     else:
         print("Citations did not load correctly. Citation file for "+issue_url+" will be deleted. This will be re-downloaded next session. ")
@@ -168,13 +169,12 @@ def get_issue_list(driver, Jname):
         # skip first becuase it is auto expanded
         
         for element in click:
-            #print(element.get_attribute('id'))
             if skip==0:
                 skip=skip+1
                 continue
             time.sleep(20)
             try:
-                element.click()
+                element.click() # add in waits to be clickables
             except Exception as e:
                 print(e)
                 print('problem expanding')
@@ -248,7 +248,7 @@ if __name__ == "__main__":
     #Jname=input_deets['journal_name']
     #pivots=Path(input_deets['pivots'])
     #masters=Path(input_deets['master'])
-    Jname='JFE'
+    Jname='journal-of-financial-economics'
     Chrome_driver=get_driver(directory, URL)
     pivots=Path("C:/Users/sjwu1/Journal_Data/Extra/JFE_pivots.xlsx") 
     masters=Path("C:/Users/sjwu1/Journal_Data/Extra/JFE_master.xlsx")
