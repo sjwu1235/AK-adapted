@@ -1,7 +1,7 @@
 {
-    "directory":"C:\\Users\\sjwu1\\Journal_Data\\JPE_data",
-    "master":"C:\\Users\\sjwu1\\Journal_Data\\Master lists\\JPE_master.xlsx", 
-    "pivots":"C:\\Users\\sjwu1\\Journal_Data\\pivots\\JPE_pivots.xlsx",
-    "year":2006, 
+    "directory":"C:/Users/sjwu1/Journal_Data/Extra/scihub", 
+    "pivots":"C:/Users/sjwu1/Journal_Data/Extra/revifinastud_pivots.xlsx", 
+    "master":"C:/Users/sjwu1/Journal_Data/Extra/revifinastud_master.xlsx",
+    "year":1991, 
     "sleep_time":20
 }
