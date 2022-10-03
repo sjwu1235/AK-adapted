@@ -30,13 +30,18 @@ temp2 = temp[['issue_url','year']].drop_duplicates()
 temp['year']=temp['year'].astype(int)
 
 processed_list=[]
-issues=temp2[temp2['year']==input_deets['year']]['issue_url']
+Syear=2016
+Eyear=2016
+#issues=temp2[temp2['year']==input_deets['year']]['issue_url']
+issues=temp2[(temp2['year']>=Eyear)&(temp2['year']<=Syear)]['issue_url']
+
 print(issues)
 for i in issues.index:
     dois=temp[temp['issue_url']==issues[i]]
     x=dois['URL']
     for j in x.index:
-        reference_id=x[j][28:]
+        print(x[j])
+        reference_id=x[j].split('jstor.org/stable/')[-1] #shift to regex answer
         print(reference_id)
         if '/' in reference_id:
             processed_list.append(reference_id)
@@ -81,6 +86,7 @@ for i in processed_list:
     time.sleep(20)
     print(i)
     try:
+        #temp=driver.find_element(By.XPATH, r".//div[@id='buttons']//button").get_attribute('onclick')[15:-1]
         temp=driver.find_element(By.XPATH, r".//div[@id='buttons']//button").get_attribute('onclick')[15:-1]
         print(temp)
         """
@@ -118,3 +124,4 @@ for i in processed_list:
             print("nope they really don't have one.")
             time.sleep(15)
         
+driver.close()

@@ -72,6 +72,7 @@ def recaptcha_note():
         ticker='Help!',
         timeout=30)
 '''
+
 def get_driver(directory, URL):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument(f"user-agent={USER_AGENT}")
@@ -128,7 +129,8 @@ def Run(driver, masterlist, lib_URL, directory, URL_starts,sleep_time):
         # finding a suitable pivot point to reduce travel
         issue_masters=masterlist[masterlist['issue_url']==URL_starts['issue_url'][ind]]
         downloaded=0
-        
+        #building a set of what doesn't exist
+        container=[]
         for a in issue_masters.index:
             path = directory / (issue_masters['URL'][a].split("/")[-1]+".pdf")
             ref_filepath = directory / (issue_masters['URL'][a].split("/")[-1]+".json")

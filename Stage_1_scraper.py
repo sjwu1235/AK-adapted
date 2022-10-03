@@ -92,10 +92,10 @@ def process_citation(directory, issue_url):
     with open(file_path, 'r', encoding="UTF-8") as input_file:
         fl = input_file.read()
         if regex.search('A problem occurred trying to deliver text citation data', fl) is not None:
-            fl=None
-        fl=fl.replace('\n','').split('@')
+            fl=None     
 
     if fl is not None:
+        fl=fl.replace('\n','').split('@')
         data={}
         count=0
         for i in fl[2:]:
@@ -124,8 +124,6 @@ def get_driver(directory, URL):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument(f"user-agent={USER_AGENT}")
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    #chrome_options.add_extension("./extension_1_38_6_0.crx")
-    #chrome_options.add_extension("./extension_busters.crx")
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_experimental_option("prefs", {
@@ -203,6 +201,7 @@ def Run(driver, directory, data):
             except:
                 print("Timed out: manually resolve the page to "+ data['issue_url'].iloc[ind])
                 print("Press enter to continue after page completely loads")
+                recaptcha_note()
                 input()
                 recaptcha_check(driver)
                 

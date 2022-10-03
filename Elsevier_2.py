@@ -43,11 +43,10 @@ def info_note():
         ticker='Help!',
         timeout=30)
 
-def get_citation(driver, attempt, attempt_limit, directory):
-    file_path=[]
+def get_zip(driver, attempt, attempt_limit, directory):
     time.sleep(10)
     for x in os.listdir(directory):
-        if ('ScienceDirect_citations' in x) and  x[-4:] == ".bib":
+        if ('ScienceDirect_articles' in x) and  x[-4:] == ".zip":
             os.remove(directory / x)
     
     if attempt<attempt_limit:
@@ -56,72 +55,58 @@ def get_citation(driver, attempt, attempt_limit, directory):
         driver.find_element(By.XPATH, ".//*[@id='article-list']//form//div//div[1]//div//div//p//button[1]//span").click()
         time.sleep(3)
 
-        driver.find_element(By.XPATH, ".//button[@class='button-alternative text-s u-margin-xs-top u-display-block js-export-citations-button button-alternative-primary']//span[2]").click()
+        #driver.find_element(By.XPATH, ".//*button[@class='button-alternative text-s button-alt-overide']//span[2]").click()
+        driver.find_element(By.XPATH, ".//*[@id='article-list']/form/div/div[1]/div/div/button[1]/span[2]").click()
         time.sleep(5)
+        #return int(driver.find_element(By.XPATH, ".//html//body//div[7]//div//div//div//div//p//span//strong").text)
         try:
-            WebDriverWait(driver,20).until(
-                expected_conditions.presence_of_element_located((By.CLASS_NAME, "js-export-citation-modal-content"))
-                )
-            driver.find_element(By.XPATH,"//button[@class='button-link button-link-primary u-margin-xs-bottom text-s u-display-block js-citation-type-bibtexabs']//span").click()
-            return 1
+            driver.find_element(By.XPATH,".//html//body//div[7]//div//div//div//div//h1").text
+            return 0
         except:
-            driver.refresh()
-            time.sleep(20)
+            return 1
+        #//*[@id="article-list"]/form/div/div[1]/div/div/button[1]/span[2]
+        #try:
+        #    WebDriverWait(driver,20).until(
+        #        expected_conditions.presence_of_element_located((By.XPATH,"//button[@class='button modal-close-button button-anchor move-right move-top u-margin-s size-xs']//span"))
+        #        )
+                
+        #    driver.find_element(By.XPATH,"//button[@class='button modal-close-button button-anchor move-right move-top u-margin-s size-xs']//span").click()
+        #    return 1
+        #except:
+        #    driver.refresh()
+        #    time.sleep(20)
             #recaptcha_check(driver)
-            return get_citation(driver, attempt+1, attempt_limit)
+        #    return get_zip(driver, attempt+1, attempt_limit)
     else:
         return 0
-        
 
-
-
-def process_citation(directory, issue_url):
+def process_zip(directory, issue_url):
     file_path=directory / "dummy_dont_exist.txt"    
-    final_name=directory / (issue_url.split('https://www.sciencedirect.com/journal/')[-1].replace('/','_')+'.bib')
+    final_name=directory / (issue_url.split('https://www.sciencedirect.com/journal/')[-1].replace('/','_')+'.zip')
     if os.path.exists(final_name)==True:
         file_path=final_name
     #poll directory for file existence
     
     while os.path.exists(file_path)==False:
         for x in os.listdir(directory):
-            if ('ScienceDirect_citations' in x) and x[-4:] == ".bib":
+            if ('ScienceDirect_articles' in x) and x[-4:] == ".zip":
                 file_path = directory / x
+                fl=1
                 break
             file_path = directory / "dummy_dont_exist.txt"
+        time.sleep(10)
 
-    fl=None
-    with open(file_path, 'r', encoding="UTF-8") as input_file:
-        fl = input_file.read()
-        if regex.search('A problem occurred trying to deliver text citation data', fl) is not None:
-            fl=None     
+     
 
     if fl is not None:
-        fl=fl.replace('\n','').split('@article')
-        print(fl)
-        data={}
-        count=0
-        for i in fl[1:]:
-            tp=i.find('{')
-            tp2=i.find(',')
-            test=i[tp2+1:].replace('{','').split('},')
-            print(test)
-            python_dict={}
-            python_dict['type']=i[:tp]
-            python_dict['issue_url']=issue_url
-            for j in test:
-                if '=' in j:
-                    temp=j.replace('{','').replace('}','').split('=')
-                    python_dict[temp[0].strip()]=temp[1].strip()
-            data[count]=python_dict
-            count+=1
+        print('rename files')
         os.rename(file_path, final_name)
-        print(pd.DataFrame(data).transpose())
-        return pd.DataFrame(data).transpose()  
+        return 1
     else:
-        print("Citations did not load correctly. Citation file for "+issue_url+" will be deleted. This will be re-downloaded next session. ")
+        print("Zip did not load correctly. Citation file for "+issue_url+" will be deleted. This will be re-downloaded next session. ")
         if os.path.exists(file_path)==True:
             os.remove(file_path)
-        return pd.DataFrame()
+        return 0
 
 def get_driver(directory, URL):
     chrome_options = webdriver.ChromeOptions()
@@ -141,77 +126,28 @@ def get_driver(directory, URL):
     driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
     #driver.set_window_position(1024, 1024, windowHandle ='current')
     driver.get(URL)
-    #try:
-    #    WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, "grid section-container")))
-    #    print("passed")
-    #except:
-    #    print("Failed to access journal page")
-    #    driver.refresh()
-    #    time.sleep(30)
+    try:
+        WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, "grid section-container")))
+        print("passed")
+    except:
+        print("Failed to access journal page")
+        driver.refresh()
+        time.sleep(30)
         #recaptcha_check(driver)
     print('loaded?')
-    info_note()
+    #info_note()
     input()
     time.sleep(20)
     #accept_cookies(driver)
     return driver
-    
-def get_issue_list(driver, Jname):
-    
-    data=pd.DataFrame(columns=COLS)
-    stop=1
-    
-    while stop!='stop':
-        expansion_errors=0
-        click=driver.find_elements(By.XPATH,"//button[@class='accordion-panel-title u-padding-s-ver u-text-left text-l js-accordion-panel-title']")
-        #print(click)
-        skip=0
-        # expand the drawers one by one, sometimes it doesn't work if you bulk click
-        # skip first becuase it is auto expanded
-        
-        for element in click:
-            if skip==0:
-                skip=skip+1
-                continue
-            time.sleep(20)
-            try:
-                element.click() # add in waits to be clickables
-            except Exception as e:
-                print(e)
-                print('problem expanding')
-                expansion_errors=expansion_errors+1
-    
-
-        # let everything settle
-        time.sleep(10)
-        print('Please ensure that everything is expanded. Then press enter.')
-        print('else reload page and expand all years manually and then continue.')
-        print('There are '+str(expansion_errors)+' years that have not been expanded.')
-        info_note()
-        input()
-        decade_List=driver.find_elements(By.XPATH,"//div[@class='issue-item u-margin-s-bottom']")
-        for element in decade_List:
-            anchor=element.find_element(By.XPATH, ".//a[@class='anchor js-issue-item-link text-m anchor-default']")
-            href=anchor.get_attribute('href')
-            print(href)
-            VI=anchor.text
-            MY=element.find_element(By.XPATH, ".//span//h3[@class='js-issue-status text-s']")
-            year=MY.text.split(' ')[-1][-5:-1]
-            issue_text=MY.text+'__'+VI
-            data=pd.concat([data, pd.DataFrame([{'year':int(year),'issue_url':href, 'Elsevier_issue_text':issue_text, 'journal':Jname}])], ignore_index=True )
-        print('go to next page')
-        info_note()
-        stop=input()
-    return data
-
 
 def Run(driver, directory, data):
     throttle=0
     masterlist=pd.DataFrame()
     
     for ind in data.index:   
-        time.sleep(5+5*random.random())   
-        file_path=directory / (data['issue_url'].iloc[ind].split('https://www.sciencedirect.com/journal/')[-1].replace('/','_')+'.bib')
+        
+        file_path=directory / (data['issue_url'].iloc[ind].split('https://www.sciencedirect.com/journal/')[-1].replace('/','_')+'.zip')
         print(file_path)
         #poll directory for file existence
         if os.path.exists(file_path)==False:
@@ -228,14 +164,14 @@ def Run(driver, directory, data):
             time.sleep(5+throttle)
             #accept_cookies(driver)     
 
-            indicator=get_citation(driver, 0, 10, directory)
+            indicator=get_zip(driver, 0, 10, directory)
             if indicator == 0: 
                 print('Unknown problem')
                 print('The scraper is going to shut down now.\nPlease restart the scraper')
                 driver.close()
                 quit()
-
-        masterlist=pd.concat([masterlist, process_citation(directory, data['issue_url'].iloc[ind])], ignore_index=True)
+            process_zip(directory, data['issue_url'].iloc[ind])
+            time.sleep(5+5*random.random())   
     return masterlist
         
 if __name__ == "__main__":
@@ -244,28 +180,17 @@ if __name__ == "__main__":
         input_deets = json.load(input_file)
 
     #URL = input_deets['journal_URL']
-    URL="https://www.sciencedirect.com/journal/journal-of-financial-economics/issues"
+    URL="https://www.sciencedirect.com/"
     directory = Path(input_deets['directory']) / "journal-of-financial-economics"
     #Jname=input_deets['journal_name']
     #pivots=Path(input_deets['pivots'])
     #masters=Path(input_deets['master'])
+    StartYear=2010
+    EndYear=2012
     Jname='journal-of-financial-economics'
     Chrome_driver=get_driver(directory, URL)
     pivots=Path("C:/Users/sjwu1/Journal_Data/Extra/JFE_pivots.xlsx") 
     masters=Path("C:/Users/sjwu1/Journal_Data/Extra/JFE_master.xlsx")
-    issue_data=None
-    x=1
-    #if input_deets['pivot_scrape_indicator']==1:
-    if x==0:
-        issue_data=get_issue_list(Chrome_driver, Jname)
-        issue_data.to_excel(pivots, index=False)
-    else:
-        issue_data=pd.read_excel(pivots)
-
+    issue_data=pd.read_excel(pivots)
     output=Run(Chrome_driver, directory, issue_data)
-    
-    if len(output['issue_url'].unique())==len(issue_data):
-        output.to_excel(masters, index=False)
-    else:
-        print('Rerun scraper. Masterlist incomplete')
     Chrome_driver.close()
