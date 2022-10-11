@@ -1,7 +1,7 @@
 {
-    "directory":"C:/Users/sjwu1/Journal_Data/Extra/scihub", 
-    "pivots":"C:/Users/sjwu1/Journal_Data/Extra/revifinastud_pivots.xlsx", 
-    "master":"C:/Users/sjwu1/Journal_Data/Extra/revifinastud_master.xlsx",
-    "year":1991, 
+    "directory":"C:/Users/sjwu1/Journal_Data/Extra/scihubjf", 
+    "pivots":"C:/Users/sjwu1/Journal_Data/Extra/jfinance_pivots.xlsx", 
+    "master":"C:/Users/sjwu1/Journal_Data/Extra/jfinance_master.xlsx",
+    "year":1992, 
     "sleep_time":20
 }

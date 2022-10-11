@@ -1,12 +1,12 @@
 {
     "journal_URL":"https://www.jstor.org/journal/jfinance",
-    "directory":"C:/Users/sjwu1/Journal_Data/Extra/jfinance", 
-    "pivots":"C:/Users/sjwu1/Journal_Data/Extra/jfinance/jfinance_pivots.xlsx", 
-    "master":"C:/Users/sjwu1/Journal_Data/Extra/jfinance/jfinance_master.xlsx",
+    "directory":"D:/docs/Masters/Data/Extra/scihubjf", 
+    "pivots":"D:/docs/Masters/Data/Extra/jfinance_pivots.xlsx", 
+    "master":"D:/docs/Masters/Data/Extra/jfinance_master.xlsx",
     "pivot_scrape_indicator": 0,
     "journal_name":"jfinance",
-    "start_year":2015, 
-    "end_year":2016, 
-    "sleep_time":15, 
+    "start_year":1946, 
+    "end_year":2012, 
+    "sleep_time":20, 
     "affiliations":0
 }
