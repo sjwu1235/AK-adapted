@@ -185,12 +185,13 @@ if __name__ == "__main__":
     #Jname=input_deets['journal_name']
     #pivots=Path(input_deets['pivots'])
     #masters=Path(input_deets['master'])
-    StartYear=2010
-    EndYear=2012
+    StartYear=1983
+    EndYear=1988
     Jname='journal-of-financial-economics'
     Chrome_driver=get_driver(directory, URL)
-    pivots=Path("C:/Users/sjwu1/Journal_Data/Extra/JFE_pivots.xlsx") 
-    masters=Path("C:/Users/sjwu1/Journal_Data/Extra/JFE_master.xlsx")
+    pivots=Path("D:/docs/Masters/Data/Extra/JFE_pivots.xlsx") 
+    masters=Path("D:/docs/Masters/Data/Extra/JFE_master.xlsx")
     issue_data=pd.read_excel(pivots)
+    issue_data_subset=issue_data[(issue_data['year']>=StartYear)&(issue_data['year']<=EndYear)].reset_index(drop=True)
     output=Run(Chrome_driver, directory, issue_data)
     Chrome_driver.close()

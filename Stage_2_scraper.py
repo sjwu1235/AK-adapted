@@ -17,7 +17,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver import ActionChains
 import regex
 
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.5249.61 Safari/537.36'
 
 def accept_cookies(driver):
     try:
@@ -26,7 +26,7 @@ def accept_cookies(driver):
         )
         driver.find_element(By.ID, 'onetrust-accept-btn-handler').click()
     except Exception as e:
-        print('no cookies')
+        print(r'no cookies')
         #print(e)
         
 def recaptcha_check(driver):
@@ -42,28 +42,6 @@ def recaptcha_check(driver):
         print('no_recaptcha')
         #print(e)
 '''
-def recaptcha_check2(driver):
-    try:
-        WebDriverWait(driver, 10).until(
-            expected_conditions.presence_of_element_located((By.CLASS_NAME, 'viewer-error'))
-        )
-        style=driver.find_element(By.CLASS_NAME, 'viewer-error').get_attribute('style')
-        if style=='display: none;':
-            print('no_recaptcha')
-        else:
-            recaptcha_note()
-            print('recaptcha found\nplease pass recaptcha and allow to resolve\nthen press enter to continue')
-            driver.refresh()
-            input()
-            recaptcha_check(driver)
-    except Exception as e:
-        recaptcha_note()
-        print('recaptcha found\nplease pass recaptcha and allow to resolve\nthen press enter to continue')
-        driver.refresh()
-        input()
-        recaptcha_check(driver)  
-
-
 def recaptcha_note():
     notification.notify(
         app_name='Stage_2_scraper.py',
@@ -104,7 +82,7 @@ def get_driver(directory, URL):
         WebDriverWait(driver, 10).until(
             expected_conditions.presence_of_element_located((By.NAME, "Query"))
         )
-        print("passed")
+        print(r"passed")
         time.sleep(5)
     except Exception as e:
         print(e)
@@ -118,13 +96,9 @@ def get_driver(directory, URL):
     return [driver, lib_URL]
 
 
-def seek(driver, issue_URL, masterlist, ID):
- #not yet implemented
-    return 0
-
 def Run(driver, masterlist, lib_URL, directory, URL_starts,sleep_time):
-    throttle=0
     print(lib_URL)
+    throttle=0
     for ind in URL_starts.index:
         # finding a suitable pivot point to reduce travel
         issue_masters=masterlist[masterlist['issue_url']==URL_starts['issue_url'][ind]]
@@ -133,19 +107,18 @@ def Run(driver, masterlist, lib_URL, directory, URL_starts,sleep_time):
         container=[]
         for a in issue_masters.index:
             path = directory / (issue_masters['URL'][a].split("/")[-1]+".pdf")
-            ref_filepath = directory / (issue_masters['URL'][a].split("/")[-1]+".json")
-            
-            if (not os.path.exists(ref_filepath)) or (not os.path.exists(path)):
+            if (not os.path.exists(path)):
                 # point it at the first URL that hasn't been scraped for references or the pdf
-                driver.get(regex.sub(r'http://(.+?)/', r'https://'+lib_URL+'/', issue_masters['URL'][a]))
-                print('starting from: '+issue_masters['URL'][a])
-                print(str(downloaded) + ' complete references and pdfs downloaded')
-                break
-            downloaded+=1
-        
-        time.sleep(5+sleep_time*random.random())
+                container.append(issue_masters['URL'][a])
+            else:
+                downloaded+=1
         if (downloaded==issue_masters.shape[0]):
-            continue    
+            continue 
+        driver.get(regex.sub(r'htt(p|ps)://(.+?)/', r'https://'+lib_URL+'/', container[0]))
+        print('starting from: '+container[0])
+        container.pop(0)
+        print(str(downloaded) + ' of '+str(issue_masters.shape[0])+' complete references and pdfs downloaded')
+        time.sleep(5+sleep_time*random.random())
         x=0
         while x==0:
             accept_cookies(driver)
@@ -156,106 +129,11 @@ def Run(driver, masterlist, lib_URL, directory, URL_starts,sleep_time):
                 print("Article page not loading")
                 print("Please resolve page to" + driver.current_url)
                 print("Then enter to continue")
-                #recaptcha_note()
                 input()
-            
-            #recaptcha_check2(driver)
 
             url=driver.find_element(By.CLASS_NAME, 'stable-url').text
             path = directory/(url.split("/")[-1]+".pdf")
-            ref_filepath = directory/(url.split("/")[-1]+".json")
-            #check if the record is complete ie: scraped references and pdfs
-            if (os.path.exists(ref_filepath)) and (os.path.exists(path)):
-                try: 
-                    print('execute 2')
-                    
-                    WebDriverWait(driver, 20).until(
-                    expected_conditions.presence_of_element_located((By.XPATH, ".//mfe-content-details-pharos-icon[@name='chevron-right']"))
-                    ) 
-                    I=driver.find_element(By.XPATH,".//mfe-content-details-pharos-icon[@name='chevron-right']")
-                    # action object creation to scroll
-                    driver.execute_script("arguments[0].scrollIntoView(true);", I)
-                    I.click()
-                except Exception as a:
-                    print(a)
-                    print("was not able to go to next item")
-                    print("seems to have reached end of issue")
-                    x=1
-                continue
-                    
-            #locating references
-            ref_raw=''
-            ref_struct=''
-            foot_struct=''
-            metadata_tab=None
-            try:
-                WebDriverWait(driver,10).until(
-                    expected_conditions.element_to_be_clickable((By.NAME, 'book'))
-                )
-                time.sleep(5)
-                
-                metadata_tab=driver.find_element(By.NAME, "book")
-                metadata_tab.click()
-                
-                time.sleep(2)
-                WebDriverWait(driver,10).until(
-                    expected_conditions.presence_of_element_located((By.ID, 'references'))
-                )
-                
-                ref_raw= driver.find_element(By.ID, r"references").get_attribute('innerHTML')
-                ref_obj2=driver.find_elements(By.XPATH, r"//div[@id='references']/div/div")
-                for element in ref_obj2:
-                    if (element.find_element(By.CLASS_NAME, r"reference-block-title").text=='[Footnotes]'):
-                        for k in element.find_elements(By.XPATH, r".//ul/li[@class='reference-list__item']"):
-                            foot_struct+=k.find_element(By.XPATH, r".//div/div[@class='media-img']/span[@class='right']").text +'__'
-                            try:
-                            
-                                temp=k.find_elements(By.XPATH, ".//div/div/div/ul/li")
-                                if len(temp)>0:
-                                    for y in temp:
-                                        foot_struct+=y.text+'--'
-                                        try:
-                                            foot_struct+=y.find_element(By.XPATH, ".//content-viewer-pharos-link").get_attribute('href')+'\n'
-                                        except:
-                                            foot_struct+='no_crossref\n'
-                                else:
-                                    raise 1
-                            except:
-                                temp=k.find_element(By.XPATH, ".//div/div[@class='media-body reference-contains']")
-                                foot_struct+=temp.text+'--'
-                                try:
-                                    foot_struct+=temp.find_element(By.XPATH, ".//content-viewer-pharos-link").get_attribute('href')+'\n'
-                                except:
-                                    foot_struct+='no_crossref\n'
-                    else:
-                        for k in element.find_elements(By.XPATH, r".//ul/li[@class='reference-list__item']"):
-                            ref_struct+=k.text+'--'
-                            try:
-                                ref_struct+=k.find_element(By.XPATH, ".//content-viewer-pharos-link").get_attribute('href')+'\n'
-                            except:
-                                ref_struct+='no_crossref\n'   
-                #print('########### starting ##############')
-                #print(foot_struct)
-                #print('########### mid ################')
-                #print(ref_struct)
-                #print("########### fin ################")
-                print('references scraped')
-            except Exception as e: 
-                print(e)
-                print('no references in contents')
-                
             time.sleep(3+random.random())
-            if metadata_tab != None:
-                try:
-                    time.sleep(5)
-                    WebDriverWait(driver,10).until(
-                        expected_conditions.presence_of_element_located((By.NAME, "info-inverse"))
-                    )
-                    driver.find_element(By.NAME, "info-inverse").click()
-                except Exception as e:
-                    print(e)
-                    print('could not click')
-                time.sleep(3+random.random())
             
             #click download but only if not there already
             if not os.path.isfile(path):
@@ -267,47 +145,39 @@ def Run(driver, masterlist, lib_URL, directory, URL_starts,sleep_time):
                         ) 
                     driver.find_element(By.XPATH, r".//mfe-download-pharos-button[@data-qa='accept-terms-and-conditions-button']").click()
                 except:
-                    print("no t&c")
+                    print(r"no t&c")
 
             #need to allow time for download to complete and return to initial page
             time.sleep(15+sleep_time*random.random())
-
-            #inserting this thing
-                       
-            ref_filename=directory/(url.split("/")[-1]+".json")
-            if os.path.exists(ref_filename)==False:
-                temp = {'stable_url': url,'raw':ref_raw,'footnotes':foot_struct,'references':ref_struct}
-                with open(ref_filename, "w") as outfile:
-                    json.dump(temp, outfile) 
             
             # try move to the next article, if it doesn't work, assume the end of the issue has been reached
             try: 
-                print('execute 3')
                 WebDriverWait(driver, 20).until(
                     expected_conditions.presence_of_element_located((By.XPATH, ".//mfe-content-details-pharos-icon[@name='chevron-right']"))
                     ) 
                 I=driver.find_element(By.XPATH,".//mfe-content-details-pharos-icon[@name='chevron-right']")
-                # action object creation to scroll
-                driver.execute_script("arguments[0].scrollIntoView(true);", I)
-                I.click()
-                time.sleep(0.4)
+                link=driver.find_elements(By.XPATH,".//*[@id='issue-pager']//mfe-content-details-pharos-link")[-1].get_attribute('href')
+
+                if len(container)==0:
+                    x=1
+                elif link.split('/')[-1]!=container[0]:
+                    driver.get(regex.sub(r'htt(p|ps)://(.+?)/', r'https://'+lib_URL+'/', container[0]))
+                    container.pop(0)
+                else:
+                    # action object creation to scroll
+                    driver.execute_script("arguments[0].scrollIntoView(true);", I)
+                    I.click()
+                    time.sleep(0.4*sleep_time)
             except Exception as a:
-                print(a)
                 try: 
                     WebDriverWait(driver, 20).until(
                     expected_conditions.element_to_be_clickable((By.XPATH, r".//mfe-content-details-pharos-icon[@name='chevron-left']"))
                     ) 
-                    print("Was not able to go to next item. Seems to have reached end of issue")    
                     x=1
-                    #print('execute 4')
                 except:
                     print("Stall, possible recaptcha, please resolve stall to "+url)
                     print("Enter to continue once page is resolved")
                     input()
-                            
-            print(driver.current_url)
-            #print('execute 5')
-            #print(x)
 
 if __name__ == "__main__":
     # Journal page URL
@@ -323,12 +193,9 @@ if __name__ == "__main__":
     end_year=input_deets['end_year']
     sleep_time=input_deets['sleep_time']
     URL_starts = masters[(masters['year']>=start_year)&(masters['year']<=end_year)].sort_values(['issue_url','URL'], axis=0).groupby('issue_url').head(1)
-    
-    print(URL_starts['URL'])
-    
     Chrome_driver=get_driver(directory, 'https://www.jstor.org/')
     issue_data=None
     Run(Chrome_driver[0], masters, Chrome_driver[1], directory, URL_starts, sleep_time)
     
-    Chrome_driver.close()
+    Chrome_driver[0].close()
     
