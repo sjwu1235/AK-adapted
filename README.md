@@ -1,10 +1,9 @@
 # information-retrieval <!-- omit in toc -->
 
 A python program to scrape articles from JSTOR based on some user specified fields. This is a two stage process:
-1. Stage_1_scraper.py scrapes the specified journal page on JSTOR for all issue links and then iterates through each issue page to get links to the first article of each issue eg: a pivot point.
-2. Given a year range, Stage_2_scraper.py scrapes articles issue by issue using the pivots excel file from stage 1 and dumps metadata scraped from each article page into datadump.xlsx at the end of scraping an issue.
+1. Stage_1_scraper.py scrapes the specified journal page on JSTOR for all issue links and then iterates through each issue page to get the links of all the articles in the issue. The output is two files: a excel list of urls to each issues page and a masterlist of all the articles for this journal. There will also be all the bulk citation files in bibtex for each issue referenced by the jstor issue ID. This part of the program does not require an affiliated institution's credentials
 
-Users of this program will have to have access to an affliated institution's username and password.
+2. Given a year range, Stage_2_scraper.py scrapes articles issue by issue using the pivots excel file from stage 1 and dumps metadata scraped from each article page into datadump.xlsx at the end of scraping an issue. Users of this program will have to have access to an affliated institution's credentials.
 
 Note: a potential inefficiency exists. It is possible to scrape all URLs or download the citations in bulk from the journal page. Then directly query these URLs rather than navigating the issue using 'next' and 'previous' buttons. However, it is uncertain if this method will raise reCAPTCHA issues. Can confidently confirm that uBlock has not defeated reCAPTCHA.
 
@@ -36,17 +35,16 @@ This is based off the original Aaron's Kit scraper program hosted at [https://gi
 5. Now edit the inputs.json file in the cloned directory, it currently is set to scrape AER as an example
 {"journal_URL":"URL of journal page on JSTOR",
  "journal_name":"Name of journal",
- "directory":"folder path to pdf data eg: C:\\Users\\xxxx\\Journal_Data", 
- "datadump":"path to datadump.xlsx eg: C:\\Users\\xxxx\\Journal_Data\\datadump.xlsx", 
- "pivots":"path to pivots file you can name it anything each session eg: C:\\Users\\xxxx\\Journal_Data\\pivots.xlsx",
- "master":"path to masterlist file C:\\Users\\xxxx\\Journal_Data\\Masterlist.xlsx",
+ "directory":"folder path to pdf data eg: C:/Users/xxxx/Journal_Data", 
+ "pivots":"path to pivots file you can name it anything each session eg: C:/Users/xxxx/Journal_Data/pivots.xlsx",
+ "pivot_scrape_indicator": 1 if you don't have a pivot file output yet or 0 if you have the pivot file and would like to pick up from where you stopped the program,
+ "master":"path to masterlist file C:/Users/xxxx/Journal_Data/Masterlist.xlsx",
  "start_year": year to start scraping eg: 2000, 
  "end_year": year to stop scraping (inclusive) eg: 2020, 
  "sleep_time": time taken to download pdf in speed test. Suggest 20 or longer
- "affiliations": 0 for don't scrape and 1 for do scrape author affiliations}
-6. Note: When editing inputs.json, replace all single "\" characters in file paths with "\\" eg: "C:\Users\xxxx\Journal_Data" to "C:\\Users\\xxxx\\Journal_Data"
-7. Run the scrapers. First Stage_1_scraper.py then Stage_2_scraper.py. See [Run The Applications](#run-the-applications) for details
-8. Alternatively, get an excel file of pivot URLs and just run Stage_2_scraper.py
+ "affiliations": 0 for don't scrape affiliations or 1 for scrape affiliations}
+6. Run the scrapers. First Stage_1_scraper.py then Stage_2_scraper.py. See [Run The Applications](#run-the-applications) for details
+7. Alternatively, get a copy of pivot and masterlist excel files and just run Stage_2_scraper.py
 
 ## Scihub
 An alternative script scihub.py scrapes articles from SciHub using the masterlist and pivot list generated from Stage_1_scraper.py. To run:
@@ -76,7 +74,7 @@ Run the journal issue scraper
 ```
 python Stage_1_scraper.py
 ```
-After navigating to the journal page, manually verify that the scraper expands all the decade fields. This will take about 2 minutes. This is to ensure that all issue URLs are scraped in this stage. Thereafter, you can leave it undisturbed to run. This scraper will iterate through each issue of the journal and scrape the issue's first article URL which will be used in the stage_2_scraper. The output from this scraper will be saved to whatever excel file path is in the 'pivots' field of inputs.json.
+After navigating to the journal page, manually verify that the scraper expands all the decade fields. This will take about 2 minutes. This is to ensure that all issue URLs are scraped in this stage. Thereafter, you can leave it undisturbed to run. This scraper will iterate through each issue of the journal and scrape the issue's first article URL which will be used in the stage_2_scraper. The output from this scraper will be saved to the excel file path is in the 'pivots' field and 'masterlist' fields of inputs.json. Note: you do not require a university login to use Stage_1_scraper.py.
 
 Run article scraper
 ```
