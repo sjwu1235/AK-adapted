@@ -26,19 +26,20 @@ with open(r'Scihub_inputs.json', 'r') as input_file:
 
 directory = Path(input_deets['directory'])  
 temp = pd.read_excel(input_deets['master'])
+print(temp.columns)
 temp2 = temp[['issue_url','year']].drop_duplicates()
 temp['year']=temp['year'].astype(int)
 
 processed_list=[]
-Syear=2016
-Eyear=2016
+Syear=2012
+Eyear=2012
 #issues=temp2[temp2['year']==input_deets['year']]['issue_url']
 issues=temp2[(temp2['year']>=Eyear)&(temp2['year']<=Syear)]['issue_url']
 
 print(issues)
 for i in issues.index:
     dois=temp[temp['issue_url']==issues[i]]
-    x=dois['URL']
+    x=dois['stable_url']
     for j in x.index:
         print(x[j])
         reference_id=x[j].split('jstor.org/stable/')[-1] #shift to regex answer
@@ -47,27 +48,25 @@ for i in issues.index:
             processed_list.append(reference_id)
         else:
             processed_list.append('10.2307/'+ reference_id)
-    print(dois['URL'].shape)
+    print(dois['stable_url'].shape)
 print('executed')
 
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.102 Safari/537.36'
 chrome_options = webdriver.ChromeOptions()
-
 chrome_options.add_argument(f"user-agent={USER_AGENT}")
 chrome_options.add_argument("--disable-blink-features=AutomationControlled")
 chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 chrome_options.add_experimental_option("useAutomationExtension", False)
 chrome_options.add_experimental_option("prefs", {
-    "download.default_directory": str(directory), #Change default directory for downloads
     "download.prompt_for_download": False, #To auto download the file
     "download.directory_upgrade": True,
     "plugins.always_open_pdf_externally": True, #It will not show PDF directly in chrome
     "credentials_enable_service": False, # gets rid of password saver popup
     "profile.password_manager_enabled": False #gets rid of password saver popup
 })
-
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options = chrome_options)
+driver = webdriver.Chrome(service=Service(ChromeDriverManager(version='104.0.5112.79').install()), options=chrome_options)
 driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+
 time.sleep(5)
 
 mirrors=["//zero.sci-hub.se","//moscow.sci-hub.se","//twin.sci-hub.se"]
@@ -108,7 +107,7 @@ for i in processed_list:
             print('trying an alternative method...')
             temp=driver.find_element(By.XPATH, r".//div[@id='buttons']//button").get_attribute('onclick')[15:-1]
             driver.find_element(By.XPATH, r".//div[@id='buttons']//button").click()
-            time.sleep(30) # give it 60 seconds to download
+            time.sleep(15) # give it 60 seconds to download
             print(temp)
             filename = re.search("(.*)/(.*)\?download=true",temp).group(2)
             checkfile=directory / filename

@@ -4,6 +4,7 @@ import time
 import pandas as pd
 import random
 import os
+import re
 
 #from plyer import notification
 from selenium import webdriver
@@ -65,7 +66,7 @@ def get_driver(directory, URL):
         "credentials_enable_service": False, # gets rid of password saver popup
         "profile.password_manager_enabled": False #gets rid of password saver popup
     })
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager(version='104.0.5112.79').install()), options=chrome_options)
     driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
     print('Attempting to connect to JSTOR', end = '\r')
@@ -123,21 +124,24 @@ def Run(driver, masterlist, lib_URL, directory, URL_starts,sleep_time):
         while x==0:
             accept_cookies(driver)
             try:
-                WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "metadata-info-tab-contents")))
-            except Exception as a:
-                print(a)
+                WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "item_view_content")))
+            except Exception as e:
+                print(e)
                 print("Article page not loading")
                 print("Please resolve page to" + driver.current_url)
                 print("Then enter to continue")
                 input()
-
-            url=driver.find_element(By.CLASS_NAME, 'stable-url').text
+            print('find stable_url')
+            url=driver.find_element(By.CLASS_NAME, 'copy-stable-url').text
+            url1=re.sub(r'https',r'http',url)
             path = directory/(url.split("/")[-1]+".pdf")
             time.sleep(3+random.random())
             
             #click download but only if not there already
             if not os.path.isfile(path):
-                driver.find_element(By.XPATH, r".//mfe-download-pharos-button[@data-sc='but click:pdf download']").click()
+                #//*[@id="content-viewer-container"]/div[3]/div/div[4]/div/mfe-download-pharos-button
+                print("trying to click button ")
+                driver.find_element(By.XPATH, r".//mfe-download-pharos-button[@data-qa='download-pdf']").click()
                 # bypass t&c
                 try:
                     WebDriverWait(driver, 10).until(
@@ -150,7 +154,35 @@ def Run(driver, masterlist, lib_URL, directory, URL_starts,sleep_time):
             #need to allow time for download to complete and return to initial page
             time.sleep(15+sleep_time*random.random())
             
+            paper_info=issue_masters[issue_masters['URL']==url]
+            
+            if len(paper_info)==0:
+                paper_info=issue_masters[issue_masters['URL']==url1]
+
+            if pd.isna(paper_info['author']).to_list()[0]:
+                f_word=paper_info['title'].str.split(' ').str[0].str.split("'").str[0].str.split(", ").str[0].to_list()[0]
+            else: 
+                f_word=paper_info['author'].str.split(' and ').str[0].str.split(' ').str[-1].to_list()[0]
+            
+            f_word=re.sub(r'[^\x00-\x7f]',r'', f_word)
+            
+            year=paper_info['year'].to_list()[0]
+            
+            r = re.compile(str(f_word+".*"+str(int(year))))
+            newlist = list(filter(r.match, os.listdir(directory))) # Read Note below
+            
+            if(len(newlist)==1):
+                checkfile=directory / newlist[0]
+                print(checkfile)
+                os.rename(checkfile, path)
+                print('successfully renamed the file!')
+            elif len(newlist)>1:
+                print('duplicate file names, please rename '+str(checkfile) +' manually')
+            else:
+                print('suspected file named '+str(r)+' that should be named '+str(path))
+                print('otherwise, check your internet connection... this file just didn\'t download')
             # try move to the next article, if it doesn't work, assume the end of the issue has been reached
+            checkfile=None
             try: 
                 WebDriverWait(driver, 20).until(
                     expected_conditions.presence_of_element_located((By.XPATH, ".//mfe-content-details-pharos-icon[@name='chevron-right']"))
@@ -196,6 +228,6 @@ if __name__ == "__main__":
     Chrome_driver=get_driver(directory, 'https://www.jstor.org/')
     issue_data=None
     Run(Chrome_driver[0], masters, Chrome_driver[1], directory, URL_starts, sleep_time)
-    
+    print("that's all, great job!")
     Chrome_driver[0].close()
     

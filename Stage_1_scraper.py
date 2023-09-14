@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from re import L
+import re
 import time
 import pandas as pd
 import random
@@ -80,7 +80,7 @@ def get_citation(driver, attempt, attempt_limit):
 
 def process_citation(directory, issue_url):
     file_path= directory / "citations.txt"
-    final_name=directory / (issue_url.split('https://www.jstor.org/stable/10.2307/')[-1]+'.txt')
+    final_name=directory / (issue_url.split('https://www.jstor.org/stable/')[-1].replace('/','_')+'.txt')
     if os.path.exists(final_name)==True:
         file_path=final_name
     
@@ -95,7 +95,7 @@ def process_citation(directory, issue_url):
             fl=None     
 
     if fl is not None:
-        fl=fl.replace('\n','').split('@')
+        fl=re.split(r'@article|@comment|@string',fl.replace('\n',''))
         data={}
         count=0
         for i in fl[2:]:
@@ -103,12 +103,11 @@ def process_citation(directory, issue_url):
             tp2=i.find(',')
             test=i[tp2+1:].replace('{','').split('}, ')
             python_dict={}
-            python_dict['type']=i[:tp]
             python_dict['issue_url']=issue_url
             for j in test:
                 if '=' in j:
-                    temp=j.replace('{','').replace('}','').split('=')
-                    python_dict[temp[0].strip()]=temp[1].strip()
+                    temp=j.split('=')
+                    python_dict[temp[0].strip()]=temp[1].strip().replace('{','').replace('}','')
             data[count]=python_dict
             count+=1
         os.rename(file_path, final_name)
@@ -173,15 +172,28 @@ def get_issue_list(driver, Jname):
     print('Please ensure that everything is expanded. Then press enter.')
     print('else reload page and expand all years manually and then continue.')
     input()
-    decade_List=driver.find_elements(By.XPATH,r".//dd//ul//li")
+    decade_List=driver.find_elements(By.XPATH,r".//details//div//div//details//div//div//ol//li//ol")
+    #//*[@id="content"]/div[2]/collection-view-pharos-layout/div[1]/details/div/div/details[2]
+    #/html/body/main/div[2]/collection-view-pharos-layout/div[1]/details/div/div/details[1]
+    #//*[@id="decade-1970"]/div/ol/li[1]/ol
+    #//*[@id="decade-1990"]/div/ol/li[1]/ol
     for element in decade_List:
-        year_list=element.find_elements(By.XPATH, r".//ul//li//collection-view-pharos-link")
-        temp=element.get_attribute('data-year')
+        #print(element.text)
+        year_list=element.find_elements(By.XPATH, r".//li")
+        #/html/body/main/div[2]/collection-view-pharos-layout/div[1]/details/div/div/details[2]/div/div/ol/li[1]/ol
+        #//*[@id="decade-1990"]/div/ol/li[1]/ol/li[1]/collection-view-pharos-link
+        #/html/body/main/div[2]/collection-view-pharos-layout/div[1]/details/div/div/details[2]/div/div/ol/li[1]/ol
+        print("number of years in decade")
+        print(len(year_list))
+        temp=element.get_attribute('data-issues')
         if temp==None:
             continue
+        print("printing temp value")
         print(temp)
         for item in year_list:
-            data=pd.concat([data, pd.DataFrame([{'year':int(temp),'issue_url':'https://www.jstor.org'+item.get_attribute('href'), 'Jstor_issue_text':item.text, 'journal':Jname}])], ignore_index=True )
+            print(item.text)
+            issue1=item.find_element(By.XPATH, r".//collection-view-pharos-link").get_attribute('href')
+            data=pd.concat([data, pd.DataFrame([{'year':int(temp),'issue_url':'https://www.jstor.org'+issue1, 'Jstor_issue_text':item.text, 'journal':Jname}])], ignore_index=True )
     return data
 
 
@@ -190,11 +202,11 @@ def Run(driver, directory, data):
     masterlist=pd.DataFrame()
     
     for ind in data.index:   
-        time.sleep(5*random.random())   
-        file_path=directory / (data['issue_url'].iloc[ind].split('https://www.jstor.org/stable/10.2307/')[-1]+'.txt')
+        file_path=directory / (data['issue_url'].iloc[ind].split('https://www.jstor.org/stable/')[-1].replace('/','_')+'.txt')
         print(file_path)
         #poll directory for file existence
         if os.path.exists(file_path)==False:
+            time.sleep(5*random.random())  
             driver.get(data['issue_url'].iloc[ind])
             try:
                 WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "toc-export-list")))
@@ -220,7 +232,7 @@ def Run(driver, directory, data):
         
 if __name__ == "__main__":
     # Journal page URL
-    with open(r'inputs.json', 'r') as input_file:
+    with open(r'inputs_1.json', 'r') as input_file:
         input_deets = json.load(input_file)
 
     URL = input_deets['journal_URL']
@@ -237,8 +249,10 @@ if __name__ == "__main__":
         issue_data.to_excel(pivots, index=False)
     else:
         issue_data=pd.read_excel(pivots)
-
-    output=Run(Chrome_driver, directory, issue_data)
+    start_year=input_deets['start_year']
+    end_year=input_deets['end_year']
+    issue_data_subset=issue_data[(issue_data['year']>=start_year)&(issue_data['year']<=end_year)].reset_index(drop=True)
+    output=Run(Chrome_driver, directory, issue_data_subset)
     
     if len(output['issue_url'].unique())==len(issue_data):
         output.to_excel(masters, index=False)

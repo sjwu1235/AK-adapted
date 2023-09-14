@@ -245,14 +245,14 @@ if __name__ == "__main__":
 
     #URL = input_deets['journal_URL']
     URL="https://www.sciencedirect.com/journal/journal-of-financial-economics/issues"
-    directory = Path(input_deets['directory']) / "journal-of-financial-economics"
+    directory = Path(input_deets['directory']) / "journal-of-financial-economics/citation files"
     #Jname=input_deets['journal_name']
     #pivots=Path(input_deets['pivots'])
     #masters=Path(input_deets['master'])
     Jname='journal-of-financial-economics'
     Chrome_driver=get_driver(directory, URL)
-    pivots=Path("C:/Users/sjwu1/Journal_Data/Extra/JFE_pivots.xlsx") 
-    masters=Path("C:/Users/sjwu1/Journal_Data/Extra/JFE_master.xlsx")
+    pivots=Path("D:/docs/Masters/Data/Extra/JFE_pivots.xlsx") 
+    masters=Path("D:/docs/Masters/Data/Extra/JFE_master.xlsx")
     issue_data=None
     x=1
     #if input_deets['pivot_scrape_indicator']==1:
